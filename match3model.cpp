@@ -101,7 +101,7 @@ void Match3Model::initByJson()
 
 void Match3Model::generateCells()
 {
-    bool dataChanged;
+    bool dataChanged = true;
 
     beginResetModel();
     cells.clear();
@@ -116,9 +116,8 @@ void Match3Model::generateCells()
         cells.push_back(tmp_vector);
     }
 
-    dataChanged = checkBoardForMatch();
-
     while (dataChanged) {
+        qWarning() << "check cells";
         dataChanged = checkBoardForMatch();
     }
 
@@ -138,21 +137,19 @@ bool Match3Model::checkBoardForMatch()
     return cellsChanged;
 }
 
-bool Match3Model::checkCell(int x, int y)
+bool Match3Model::checkCell(int x, int y, bool addToScore)
 {
     queue<pair<int, int>> checkQuery;
-    int matchArray[dimentionX][dimentionY];
-    for (int i = 0; i < dimentionX; ++i) {
-        fill_n(matchArray[i], dimentionY, 0);
-    }
+    int matchArray[dimentionX * dimentionY];
+    fill_n(matchArray, dimentionX * dimentionY, 0);
 
     checkQuery.push(pair<int, int>(x, y));
 
     while (!checkQuery.empty()) {
         int checkedX = checkQuery.front().first;
         int checkedY = checkQuery.front().second;
-        if (cells[x][y] == cells[checkedX][checkedY] && !matchArray[checkedX][checkedY]) {
-            matchArray[checkedX][checkedY] = 1;
+        if (cells[x][y] == cells[checkedX][checkedY] && !matchArray[checkedX * dimentionY + checkedY]) {
+            matchArray[checkedX * dimentionY + checkedY] = 1;
 
             if (checkedX > 0) {
                 checkQuery.push(pair<int, int>(checkedX - 1, checkedY));
@@ -170,21 +167,19 @@ bool Match3Model::checkCell(int x, int y)
         checkQuery.pop();
     }
 
-    qWarning() << x << y;
     //delete if match3
-    return removeCellsIfNedded((int *)matchArray);
+    return removeCellsIfNedded(matchArray, addToScore);
 }
 
-bool Match3Model::removeCellsIfNedded(int *boardCells)
+bool Match3Model::removeCellsIfNedded(int *boardCells, bool addToScore)
 {
     bool shuoldBeDeleted = false;
     int elementsMatch;
-
     // check rows
     for (int col = 0; col < dimentionX; ++col) {
         elementsMatch  = 0;
         for (int row = 0; row < dimentionY; ++row) {
-            if (* ((boardCells + col * dimentionX) + row)) {
+            if (boardCells[col * dimentionY + row]) {
                 elementsMatch++;
 
                 if (elementsMatch >= 3) {
@@ -202,7 +197,7 @@ bool Match3Model::removeCellsIfNedded(int *boardCells)
         for (int row = 0; row < dimentionY; ++row) {
             elementsMatch  = 0;
             for (int col = 0; col < dimentionX; ++col) {
-                if ( *((boardCells + col * dimentionX) + row)) {
+               if (boardCells[col * dimentionY + row]) {
                     elementsMatch++;
 
                     if (elementsMatch >= 3) {
@@ -217,29 +212,30 @@ bool Match3Model::removeCellsIfNedded(int *boardCells)
     }
 
     if (shuoldBeDeleted) {
-        removeCells(boardCells);
+        removeCells(boardCells, addToScore);
     }
 
     return shuoldBeDeleted;
 }
 
-void Match3Model::removeCells(int *boardCells)
+void Match3Model::removeCells(int *boardCells, bool addToScore)
 {
     for (int col = 0; col < dimentionX; ++col) {
         for (int row = 0; row < dimentionY; ++row) {
-          if (* ((boardCells + col * dimentionX) + row) == 1) {
-                removeElement(col, row);
+          if (boardCells[col * dimentionY + row]) {
+                removeElement(col, row, addToScore);
             }
         }
     }
 }
 
-void Match3Model::removeElement(int col, int row)
+void Match3Model::removeElement(int col, int row, bool addToScore)
 {
     int index = col * dimentionY + row;
     beginRemoveRows(QModelIndex(), index, index);
     endRemoveRows();
 
+    qWarning() << "deleted: " <<cellTypes[ cells[col][row]];
     cells[col].erase(cells[col].begin() + row);
 
     // add new?
@@ -247,14 +243,29 @@ void Match3Model::removeElement(int col, int row)
     beginInsertRows(QModelIndex(), col * dimentionY, col * dimentionY);
     cells[col].push_front(getRandomCellColorId());
     endInsertRows();
-    auto newIndex = createIndex(index,0);
 
-    emit dataChanged(newIndex, newIndex, {Qt::DecorationRole});
+    if(addToScore) {
+        increaseScore();
+    }
+//    auto newIndex = createIndex(index,0);
+
+//    emit dataChanged(newIndex, newIndex, {Qt::DecorationRole});
 
 }
 
 int Match3Model::getRandomCellColorId()
 {
     return rand() % cellTypes.size();
+}
+
+void Match3Model::increaseScore()
+{
+    score += 10;
+    emit scoreChanged();
+}
+
+void Match3Model::increaseMoveCounter()
+{
+
 }
 

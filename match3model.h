@@ -42,6 +42,7 @@ public:
     int getMoveCounter() const;
 
     Q_INVOKABLE void resetGame();
+
 signals:
     void dimentionXChanged();
     void dimentionYChanged();
@@ -50,19 +51,18 @@ signals:
 
 //    Q_INVOKABLE void swapCells();
 private:
+    // generic methods
     void initByJson();
     void generateCells();
-//    void reverseSwap(); // ??
-//    bool targetMatch();
-    bool checkBoardForMatch();
-    bool checkCell(int x, int y);
-    bool removeCellsIfNedded(int *boardCells);
-    void removeCells(int *boardCells);
-    void removeElement(int col, int row);
-
     int getRandomCellColorId();
-
-
+    void increaseScore();
+    void increaseMoveCounter();
+    // match methods
+    bool checkBoardForMatch();
+    bool checkCell(int x, int y, bool addToScore = false);
+    bool removeCellsIfNedded(int *boardCells, bool addToScore);
+    void removeCells(int *boardCells, bool addToScore);
+    void removeElement(int col, int row, bool addToScore);
 private:
     // board data
    deque<deque<int> > cells;
