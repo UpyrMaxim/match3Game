@@ -1,0 +1,13 @@
+{
+    "board": {
+        "width": "6",
+        "height": "8"
+    },
+    "itemTypes": [
+        "red",
+        "blue",
+        "green",
+        "blueviolet",
+        "cyan"
+    ]
+}
