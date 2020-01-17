@@ -39,17 +39,23 @@ public:
     int getScore() const;
     int getMoveCounter() const;
 
+    // old
     Q_INVOKABLE void resetGame();
-    Q_INVOKABLE bool choseElement(int index);
+    Q_INVOKABLE bool choseElement(int index);    
     Q_INVOKABLE void reSwapElements(int index);
 
+    // new
+    Q_INVOKABLE QList<int> swapCells(int sourceIndex, int targetIndex, bool reSwap = false);
+    Q_INVOKABLE QList<int> reSwapCells(int sourceIndex, int targetIndex);
+
+    Q_INVOKABLE void removeCell(int index);
+    Q_INVOKABLE QList<int> checkBoard();
 signals:
     void dimentionXChanged();
     void dimentionYChanged();
     void scoreChanged();
     void moveCounterChanged();
 
-//    Q_INVOKABLE void swapCells();
 private:
     // generic methods
     void initByJson();
@@ -64,6 +70,10 @@ private:
     bool removeCellsIfNedded(int *boardCells, int &addToScore);
     void removeCells(int *boardCells, int addToScore);
     void removeElement(int col, int row, int addToScore);
+
+    // new
+    QList<int> findCellsToRemove(int sourceCol, int sourceRow);
+    QList<int> findMatch3Items(int *boardCells);
 private:
     // board data
    deque<deque<int> > cells;
@@ -74,6 +84,9 @@ private:
    QJsonArray cellTypes;
    int dimentionX;
    int dimentionY;
+
+   // new
+   bool swapStatus;
 };
 
 

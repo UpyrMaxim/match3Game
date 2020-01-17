@@ -1,7 +1,8 @@
 #include "match3model.h"
 
 Match3Model::Match3Model(QObject *parent, const int dimentionX, const int dimentionY)
-    : QAbstractListModel(parent), moveCounter(0),  score(0), selectedSellIndex(-1), dimentionX(dimentionX), dimentionY(dimentionY)
+    : QAbstractListModel(parent), moveCounter(0),  score(0), selectedSellIndex(-1), dimentionX(dimentionX), dimentionY(dimentionY),
+        swapStatus(false)
 {
  // get settings content (add exception ?^) )
     srand (time(NULL));
@@ -338,4 +339,144 @@ void Match3Model::reSwapElements(int index)
     swapElements(selectedSellIndex, index, false);
     selectedSellIndex = -1;
 }
+// new
 
+QList<int> Match3Model::swapCells(int sourceIndex, int targetIndex, bool reSwap)
+{
+    if(sourceIndex == targetIndex) {
+        return QList<int>();
+    }
+
+    int sourceCol =  sourceIndex / dimentionY;
+    int sourceRow = sourceIndex % dimentionY;
+
+    int targetCol =  targetIndex / dimentionY;
+    int targetRow = targetIndex % dimentionY;
+
+    int shift = sourceIndex > targetIndex ? 0 : 1;
+//    int multiplicator = 0;
+
+    beginMoveRows(QModelIndex(), sourceIndex, sourceIndex, QModelIndex(), targetIndex + shift);
+    endMoveRows();
+
+    if (abs(sourceIndex - targetIndex) > 1) {
+        int zeroPositionShift = targetIndex > sourceIndex ? -1 : 1;
+        beginMoveRows(QModelIndex(), targetIndex + zeroPositionShift, targetIndex + zeroPositionShift,QModelIndex(), sourceIndex + shift + zeroPositionShift);
+        endMoveRows();
+    }
+
+    swap(cells[sourceCol][sourceRow], cells[targetCol][targetRow]);
+    if (reSwap) {
+        return QList<int>();
+    }
+
+    return findCellsToRemove(sourceCol, sourceRow) + findCellsToRemove(targetCol, targetRow);
+}
+
+
+QList<int> Match3Model::findCellsToRemove(int x, int y)
+{
+    queue<pair<int, int>> checkQuery;
+    int matchArray[dimentionX * dimentionY];
+    fill_n(matchArray, dimentionX * dimentionY, 0);
+
+    checkQuery.push(pair<int, int>(x, y));
+
+    while (!checkQuery.empty()) {
+        int checkedX = checkQuery.front().first;
+        int checkedY = checkQuery.front().second;
+        if (cells[x][y] == cells[checkedX][checkedY] && !matchArray[checkedX * dimentionY + checkedY]) {
+            matchArray[checkedX * dimentionY + checkedY] = 1;
+
+            if (checkedX > 0) {
+                checkQuery.push(pair<int, int>(checkedX - 1, checkedY));
+            }
+            if (checkedX < dimentionX - 1) {
+                checkQuery.push(pair<int, int>(checkedX + 1, checkedY));
+            }
+            if (checkedY > 0) {
+                checkQuery.push(pair<int, int>(checkedX, checkedY - 1));
+            }
+            if (checkedY < dimentionY - 1) {
+                checkQuery.push(pair<int, int>(checkedX, checkedY + 1));
+            }
+        }
+        checkQuery.pop();
+    }
+
+    return findMatch3Items(matchArray);
+}
+
+
+QList<int> Match3Model::findMatch3Items(int *boardCells)
+{
+    bool shuoldBeDeleted = false;
+    int elementsMatch;
+    QList<int> cellsToRemove;
+    // check rows
+    for (int col = 0; col < dimentionX; ++col) {
+        elementsMatch  = 0;
+        for (int row = 0; row < dimentionY; ++row) {
+            int cellIndex = col * dimentionY + row;
+            if (boardCells[cellIndex]) {
+                elementsMatch++;
+                cellsToRemove.push_back(cellIndex);
+                if (elementsMatch >= 3) {
+                    shuoldBeDeleted = true;
+                }
+            }
+        }
+    }
+
+    if (!shuoldBeDeleted ) {
+        // check cols
+        for (int row = 0; row < dimentionY; ++row) {
+            elementsMatch  = 0;
+            for (int col = 0; col < dimentionX; ++col) {
+               if (boardCells[col * dimentionY + row]) {
+                    elementsMatch++;
+
+                    if (elementsMatch >= 3) {
+                        shuoldBeDeleted = true;
+                        // to exit
+                        col = dimentionX;
+                        row = dimentionY;
+                    }
+                }
+            }
+        }
+    }
+
+    if (shuoldBeDeleted) {
+        return cellsToRemove;
+    }
+
+    return QList<int>();
+}
+
+
+
+QList<int> Match3Model::reSwapCells(int sourceIndex, int targetIndex)
+{
+    return swapCells(sourceIndex, targetIndex, true);
+}
+
+void Match3Model::removeCell(int index)
+{
+    int col =  index / dimentionY;
+    int row = index % dimentionY;
+
+    removeElement(col, row, 0);
+}
+
+QList<int> Match3Model::checkBoard()
+{
+    QList<int> cellsList;
+    for (int col = 0; col < dimentionX; ++col) {
+        for (int row = 0; row < dimentionY; ++row) {
+            cellsList += findCellsToRemove(col, row);
+        }
+    }
+
+    return cellsList.toSet().toList(); // its make it unique
+}

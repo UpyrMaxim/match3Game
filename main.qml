@@ -85,6 +85,8 @@ Window {
             GridView {
                 id: view
 
+                property int selectedIndex: -1
+
                 anchors.margins: 0
                 anchors.fill: parent
                 flow: GridView.FlowTopToBottom
@@ -98,7 +100,6 @@ Window {
 
                 delegate: Item {
                     id: delegateItem
-                    property var isCurrent: GridView.isCurrentItem
 
                     height: view.cellHeight
                     width: view.cellWidth
@@ -120,28 +121,55 @@ Window {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
+                            console.log(view.selectedIndex, index)
+                            let checkValidSwap = Math.abs(view.selectedIndex - index) == 1 || Math.abs(view.selectedIndex - index) == match3Model.dimentionY;
+                            if (view.selectedIndex >= 0 && view.selectedIndex != index && checkValidSwap) {
                             console.log('click:')
-                            if (match3Model.choseElement(index)) {
-                                console.log("asass");
-                                match3Model.reSwapElements(index);
+//                              if (match3Model.choseElement(index)) {
+//                                  console.log("asass");
+//                                  match3Model.reSwapElements(index);
+//                              }
+                                let elementIndex = index;
+                                var cellsToDestruct = match3Model.swapCells(view.selectedIndex, elementIndex);
+
+                                if (cellsToDestruct.length) {
+                                    console.log("in");
+                                    while (cellsToDestruct.length) {
+                                        // remove elements
+                                        cellsToDestruct.forEach(element => match3Model.removeCell(element));
+                                        cellsToDestruct = null;
+                                        // insert elements
+
+                                        // check board
+                                        cellsToDestruct = match3Model.checkBoard();
+                                        console.log(cellsToDestruct)
+                                    }
+
+                                } else {
+                                    match3Model.reSwapCells(view.selectedIndex, elementIndex);
+                                }
+
+                                view.selectedIndex = -1;
+                            } else {
+                               view. selectedIndex = index;
                             }
                         }
                     }
 
-                    Component.onDestruction: {
-                        destroyAnim.start()
-//                        console.log("Destruction:" + index);
+//                    Component.onDestruction: {
+//                        destroyAnim.start()
+////                        console.log("Destruction:" + index);
 
-                    }
+//                    }
 
-                     Behavior on opacity{ NumberAnimation {}}
-                     SequentialAnimation
-                     {
-                         id: destroyAnim
-                           ScriptAction{script: console.log("XD")}
-//                         ScriptAction{script: delegateItem.opacity = 0}
-//                         NumberAnimation{target: delegateItem; property:"scale"; to: 5}
-                     }
+//                     Behavior on opacity{ NumberAnimation {}}
+//                     SequentialAnimation
+//                     {
+//                         id: destroyAnim
+//                           ScriptAction{script: console.log("XD")}
+////                         ScriptAction{script: delegateItem.opacity = 0}
+////                         NumberAnimation{target: delegateItem; property:"scale"; to: 5}
+//                     }
                 }
             }
         }
