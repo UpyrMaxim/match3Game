@@ -1,13 +1,13 @@
 #include "match3model.h"
 
 Match3Model::Match3Model(QObject *parent, const int dimentionX, const int dimentionY)
-    : QAbstractListModel(parent), dimentionX(dimentionX), dimentionY(dimentionY)
+    : QAbstractListModel(parent), moveCounter(0),  score(0), selectedSellIndex(-1), dimentionX(dimentionX), dimentionY(dimentionY)
 {
  // get settings content (add exception ?^) )
     srand (time(NULL));
 
     initByJson();
-    generateCells();
+    resetGame();
 }
 
 int Match3Model::rowCount(const QModelIndex &) const
@@ -69,6 +69,14 @@ void Match3Model::resetGame()
         generateCells();
 
         endResetModel();
+
+        score = 0;
+        emit scoreChanged();
+
+        moveCounter = 0;
+        emit moveCounterChanged();
+
+        selectedSellIndex = -1;
 }
 
 
@@ -102,6 +110,7 @@ void Match3Model::initByJson()
 void Match3Model::generateCells()
 {
     bool dataChanged = true;
+    int multiplicator = 0;
 
     beginResetModel();
     cells.clear();
@@ -118,26 +127,26 @@ void Match3Model::generateCells()
 
     while (dataChanged) {
         qWarning() << "check cells";
-        dataChanged = checkBoardForMatch();
+        dataChanged = checkBoardForMatch(multiplicator);
     }
 
     endResetModel();
 }
 
 
-bool Match3Model::checkBoardForMatch()
+bool Match3Model::checkBoardForMatch(int &multiplicator)
 {
     bool cellsChanged = false;
     for (int col = 0; col < dimentionX; ++col) {
         for (int row = 0; row < dimentionY; ++row) {
-            cellsChanged |= checkCell(col, row);
+            cellsChanged |= findAndRemoveCellSets(col, row, multiplicator);
         }
     }
 
     return cellsChanged;
 }
 
-bool Match3Model::checkCell(int x, int y, bool addToScore)
+bool Match3Model::findAndRemoveCellSets(int x, int y, int &addToScore)
 {
     queue<pair<int, int>> checkQuery;
     int matchArray[dimentionX * dimentionY];
@@ -171,7 +180,7 @@ bool Match3Model::checkCell(int x, int y, bool addToScore)
     return removeCellsIfNedded(matchArray, addToScore);
 }
 
-bool Match3Model::removeCellsIfNedded(int *boardCells, bool addToScore)
+bool Match3Model::removeCellsIfNedded(int *boardCells, int &addToScore)
 {
     bool shuoldBeDeleted = false;
     int elementsMatch;
@@ -213,12 +222,13 @@ bool Match3Model::removeCellsIfNedded(int *boardCells, bool addToScore)
 
     if (shuoldBeDeleted) {
         removeCells(boardCells, addToScore);
+        addToScore++;
     }
 
     return shuoldBeDeleted;
 }
 
-void Match3Model::removeCells(int *boardCells, bool addToScore)
+void Match3Model::removeCells(int *boardCells, int addToScore)
 {
     for (int col = 0; col < dimentionX; ++col) {
         for (int row = 0; row < dimentionY; ++row) {
@@ -229,7 +239,7 @@ void Match3Model::removeCells(int *boardCells, bool addToScore)
     }
 }
 
-void Match3Model::removeElement(int col, int row, bool addToScore)
+void Match3Model::removeElement(int col, int row, int addToScore)
 {
     int index = col * dimentionY + row;
     beginRemoveRows(QModelIndex(), index, index);
@@ -238,17 +248,12 @@ void Match3Model::removeElement(int col, int row, bool addToScore)
     qWarning() << "deleted: " <<cellTypes[ cells[col][row]];
     cells[col].erase(cells[col].begin() + row);
 
-    // add new?
-
     beginInsertRows(QModelIndex(), col * dimentionY, col * dimentionY);
     cells[col].push_front(getRandomCellColorId());
     endInsertRows();
 
-    if(addToScore) {
-        increaseScore();
-    }
+    increaseScore(addToScore);
 //    auto newIndex = createIndex(index,0);
-
 //    emit dataChanged(newIndex, newIndex, {Qt::DecorationRole});
 
 }
@@ -258,14 +263,79 @@ int Match3Model::getRandomCellColorId()
     return rand() % cellTypes.size();
 }
 
-void Match3Model::increaseScore()
+void Match3Model::increaseScore(int multiplicator)
 {
-    score += 10;
+    score += 10 + 2 * multiplicator;
     emit scoreChanged();
 }
 
 void Match3Model::increaseMoveCounter()
 {
+    moveCounter++;
+    emit moveCounterChanged();
+}
 
+bool Match3Model::swapElements(int sourceIndex, int targetIndex, bool checkResult)
+{
+    int sourceCol =  sourceIndex/ dimentionY;
+    int sourceRow = sourceIndex % dimentionY;
+
+    int targetCol =  targetIndex/ dimentionY;
+    int targetRow = targetIndex % dimentionY;
+
+    int shift = sourceIndex > targetIndex ? 0 : 1;
+    int multiplicator = 0;
+
+    beginMoveRows(QModelIndex(), sourceIndex, sourceIndex, QModelIndex(), targetIndex + shift);
+    endMoveRows();
+
+    if (abs(sourceIndex - targetIndex) > 1) {
+        qWarning() << "if";
+        int zeroPositionShift = targetIndex > sourceIndex ? -1 : 1;
+        beginMoveRows(QModelIndex(), targetIndex + zeroPositionShift, targetIndex + zeroPositionShift,QModelIndex(), sourceIndex + shift + zeroPositionShift);
+        endMoveRows();
+    }
+
+    swap(cells[sourceCol][sourceRow], cells[targetCol][targetRow]);
+    if (checkResult) {
+        checkResult = findAndRemoveCellSets(sourceCol, sourceRow, multiplicator) || findAndRemoveCellSets(targetCol, targetRow, multiplicator );
+        if (checkResult) {
+            while (checkResult) {
+                qWarning() << "check cells";
+                checkResult = checkBoardForMatch(multiplicator);
+            }
+            return !checkResult;
+        } else {
+            return checkResult;
+        }
+    }
+//    return true;
+    return false;
+}
+
+bool Match3Model::choseElement(int index)
+{
+    if (selectedSellIndex >= 0 && selectedSellIndex != index) {
+        // swap elements
+        if (swapElements(selectedSellIndex, index)) {
+            increaseMoveCounter();
+            selectedSellIndex = -1;
+        } else {
+            selectedSellIndex = index;
+            return true;
+        }
+
+        return false;
+    } else {
+        selectedSellIndex = index;
+    }
+
+    return false;
+}
+
+void Match3Model::reSwapElements(int index)
+{
+    swapElements(selectedSellIndex, index, false);
+    selectedSellIndex = -1;
 }
 
