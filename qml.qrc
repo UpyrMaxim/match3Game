@@ -2,6 +2,5 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>setting.json</file>
-        <file>workScripts.js</file>
     </qresource>
 </RCC>

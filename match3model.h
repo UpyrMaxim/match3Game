@@ -40,10 +40,10 @@ public:
     int getMoveCounter() const;
 
     Q_INVOKABLE void resetGame();
-    Q_INVOKABLE QList<int> swapCells(int sourceIndex, int targetIndex, bool reSwap = false); // +
-    Q_INVOKABLE QList<int> reSwapCells(int sourceIndex, int targetIndex); // +
-    Q_INVOKABLE void removeCell(int index); // +
-    Q_INVOKABLE QList<int> checkBoard(); // +
+    Q_INVOKABLE QList<int> swapCells(int sourceIndex, int targetIndex, bool reSwap = false);
+    Q_INVOKABLE QList<int> reSwapCells(int sourceIndex, int targetIndex);
+    Q_INVOKABLE void removeCell(int index);
+    Q_INVOKABLE QList<int> checkBoard();
 
 signals:
     void dimentionXChanged();
@@ -52,24 +52,21 @@ signals:
     void moveCounterChanged();
 
 private:
-    // generic methods
     void initByJson();
     void generateCells();
     int getRandomCellColorId();
     void increaseScore(int multiplicator = 0);
     void increaseMoveCounter();
-    void removeElement(int col, int row, int addToScore); // +
+    void removeElement(int col, int row, int addToScore);
 
-    // new
-    QList<int> findCellsToRemove(int sourceCol, int sourceRow); // +
-    QList<int> findMatch3Items(int *boardCells); // +
+    QList<int> findCellsToRemove(int sourceCol, int sourceRow);
+    QList<int> findMatch3Items(int *boardCells);
 private:
-    // board data
    deque<deque<int> > cells;
    int moveCounter;
    int score;
    int selectedSellIndex;
-   // setting
+   // settings
    QJsonArray cellTypes;
    int dimentionX;
    int dimentionY;

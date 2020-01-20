@@ -1,7 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Window 2.12
 import custom.Match3Model 1.0
-import "workScripts.js" as WorkScripts
 
 Window {
     id: root
@@ -24,8 +23,10 @@ Window {
     Timer {
         id: timer
 
-        repeat: false;
         property var handler: function() {}
+
+        repeat: false;
+
         onTriggered: {
             handler();
         }
@@ -52,7 +53,6 @@ Window {
             Text {
                 x: 10
                 text: "Reset"
-
             }
 
             MouseArea {
@@ -140,12 +140,11 @@ Window {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            let checkValidSwap = Math.abs(view.selectedIndex - index) == 1 || Math.abs(view.selectedIndex - index) == match3Model.dimentionY;
+                            let swapIsValid = Math.abs(view.selectedIndex - index) == 1 || Math.abs(view.selectedIndex - index) == match3Model.dimentionY;
 
-                            if (view.selectedIndex >= 0 && view.selectedIndex != index && checkValidSwap) {
+                            if (view.selectedIndex >= 0 && view.selectedIndex != index && swapIsValid) {
                                 var elementIndex = index;
                                 var prevElementIndex = view.selectedIndex;
-
                                 var cellsToDestruct = match3Model.swapCells(view.selectedIndex, elementIndex);
 
                                 delay(moveAnimation.duration, function() {
@@ -168,7 +167,7 @@ Window {
                 }
 
                 move: Transition {
-                       NumberAnimation { id: moveAnimation; properties: "x,y"; duration: 400; alwaysRunToEnd: true}
+                       NumberAnimation { id: moveAnimation; properties: "x,y"; duration: 400; alwaysRunToEnd: true }
                 }
                 moveDisplaced: Transition {
                     NumberAnimation { properties: "x,y"; duration: 400; }
