@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Window 2.12
 import custom.Match3Model 1.0
+import "workScripts.js" as WorkScripts
 
 Window {
     id: root
@@ -11,6 +12,24 @@ Window {
     width: 340
     height: width + 50
     title: qsTr("Match 3")
+
+    function delay(delayTime, func) {
+        timer.restart();
+        timer.interval = delayTime;
+        timer.handler = func;
+        timer.start();
+
+    }
+
+    Timer {
+        id: timer
+
+        repeat: false;
+        property var handler: function() {}
+        onTriggered: {
+            handler();
+        }
+    }
 
     Rectangle {
         id: background
@@ -121,56 +140,57 @@ Window {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            console.log(view.selectedIndex, index)
                             let checkValidSwap = Math.abs(view.selectedIndex - index) == 1 || Math.abs(view.selectedIndex - index) == match3Model.dimentionY;
+
                             if (view.selectedIndex >= 0 && view.selectedIndex != index && checkValidSwap) {
-                            console.log('click:')
-//                              if (match3Model.choseElement(index)) {
-//                                  console.log("asass");
-//                                  match3Model.reSwapElements(index);
-//                              }
-                                let elementIndex = index;
+                                var elementIndex = index;
+                                var prevElementIndex = view.selectedIndex;
+
                                 var cellsToDestruct = match3Model.swapCells(view.selectedIndex, elementIndex);
 
-                                if (cellsToDestruct.length) {
-                                    console.log("in");
-                                    while (cellsToDestruct.length) {
-                                        // remove elements
-                                        cellsToDestruct.forEach(element => match3Model.removeCell(element));
-                                        cellsToDestruct = null;
-                                        // insert elements
-
-                                        // check board
-                                        cellsToDestruct = match3Model.checkBoard();
-                                        console.log(cellsToDestruct)
+                                delay(moveAnimation.duration, function() {
+                                    if (cellsToDestruct.length) {
+                                        while (cellsToDestruct.length) {
+                                            cellsToDestruct.forEach(element => match3Model.removeCell(element));
+                                            cellsToDestruct = null;
+                                            cellsToDestruct = match3Model.checkBoard();
+                                        }
+                                    } else {
+                                        match3Model.reSwapCells(elementIndex, prevElementIndex);
                                     }
-
-                                } else {
-                                    match3Model.reSwapCells(view.selectedIndex, elementIndex);
-                                }
-
-                                view.selectedIndex = -1;
+                                    view.selectedIndex = -1;
+                                })
                             } else {
                                view. selectedIndex = index;
                             }
                         }
                     }
-
-//                    Component.onDestruction: {
-//                        destroyAnim.start()
-////                        console.log("Destruction:" + index);
-
-//                    }
-
-//                     Behavior on opacity{ NumberAnimation {}}
-//                     SequentialAnimation
-//                     {
-//                         id: destroyAnim
-//                           ScriptAction{script: console.log("XD")}
-////                         ScriptAction{script: delegateItem.opacity = 0}
-////                         NumberAnimation{target: delegateItem; property:"scale"; to: 5}
-//                     }
                 }
+
+                move: Transition {
+                       NumberAnimation { id: moveAnimation; properties: "x,y"; duration: 400; alwaysRunToEnd: true}
+                }
+                moveDisplaced: Transition {
+                    NumberAnimation { properties: "x,y"; duration: 400; }
+                }
+
+                add: Transition {
+                     NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 600 }
+                     NumberAnimation { property: "scale"; easing.type: Easing.OutBounce; from: 0; to: 1.0; duration: 950 }
+                     NumberAnimation { properties: "y"; from: 0;  duration: 800; }
+                 }
+
+                 addDisplaced: Transition {
+                     NumberAnimation { properties: "x,y"; duration: 400; easing.type: Easing.InBack }
+                 }
+
+                 remove: Transition {
+                     NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: 400 }
+                 }
+
+                 removeDisplaced: Transition {
+                     NumberAnimation { properties: "x,y"; duration: 400; easing.type: Easing.OutBack }
+                 }
             }
         }
     }
