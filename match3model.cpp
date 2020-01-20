@@ -1,7 +1,7 @@
 #include "match3model.h"
 
 Match3Model::Match3Model(QObject *parent, const int dimentionX, const int dimentionY)
-    : QAbstractListModel(parent), moveCounter(0),  score(0), selectedSellIndex(-1), dimentionX(dimentionX), dimentionY(dimentionY)
+    : QAbstractListModel(parent), m_moveCounter(0),  m_score(0), m_selectedSellIndex(-1), m_dimentionX(dimentionX), m_dimentionY(dimentionY)
 {
     srand (time(NULL));
 
@@ -11,7 +11,7 @@ Match3Model::Match3Model(QObject *parent, const int dimentionX, const int diment
 
 int Match3Model::rowCount(const QModelIndex &) const
 {
-    return dimentionX * dimentionY; // data reprented by 2d array
+    return m_dimentionX * m_dimentionY; // data reprented by 2d array
 }
 
 QVariant Match3Model::data(const QModelIndex &index, int role) const
@@ -20,11 +20,11 @@ QVariant Match3Model::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    int col = index.row() / dimentionY;
-    int row = index.row() % dimentionY;
+    int col = index.row() / m_dimentionY;
+    int row = index.row() % m_dimentionY;
 
     if (role == Qt::DecorationRole) {
-        QString colorName = cellTypes[ cells[col][row] ].toString();
+        QString colorName = m_cellTypes[ m_cells[col][row] ].toString();
         return QColor(colorName);
     } else {
         return QVariant();
@@ -42,47 +42,41 @@ Qt::ItemFlags Match3Model::flags(const QModelIndex &index) const
 
 int Match3Model::getDimentionX() const
 {
-    return dimentionX;
+    return m_dimentionX;
 }
 
 int Match3Model::getDimentionY() const
 {
-    return dimentionY;
+    return m_dimentionY;
 }
 
 int Match3Model::getScore() const
 {
-    return score;
+    return m_score;
 }
 
 int Match3Model::getMoveCounter() const
 {
-    return moveCounter;
+    return m_moveCounter;
 }
 
 void Match3Model::resetGame()
 {
-        beginResetModel();
-
-        cells.clear();
+        m_cells.clear();
         generateCells();
 
-        endResetModel();
-
-        score = 0;
+        m_score = 0;
         emit scoreChanged();
 
-        moveCounter = 0;
+        m_moveCounter = 0;
         emit moveCounterChanged();
 
-        selectedSellIndex = -1;
+        m_selectedSellIndex = -1;
 }
 
 
 void Match3Model::initByJson()
 {
-      Q_INIT_RESOURCE(qml);
-
       QString val;
       QFile file;
       file.setFileName(":/setting.json");
@@ -99,10 +93,10 @@ void Match3Model::initByJson()
       QJsonObject board = jsonObject.value(QString("board")).toObject();
 
       // set dimention values
-      dimentionY = board["height"].toString().toUInt();
-      dimentionX = board["width"].toString().toUInt();
+      m_dimentionY = board["height"].toInt();
+      m_dimentionX = board["width"].toInt();
       // set cells types
-      cellTypes = jsonObject.value(QString("itemTypes")).toArray();
+      m_cellTypes = jsonObject.value(QString("itemTypes")).toArray();
 }
 
 void Match3Model::generateCells()
@@ -110,24 +104,24 @@ void Match3Model::generateCells()
     bool dataChanged = true;
 
     beginResetModel();
-    cells.clear();
+    m_cells.clear();
 
-    for (int col = 0; col < dimentionX; ++col) {
+    for (int col = 0; col < m_dimentionX; ++col) {
         deque<int> tmp_vector;
 
-        for (int row = 0; row < dimentionY; ++row) {
+        for (int row = 0; row < m_dimentionY; ++row) {
             tmp_vector.push_back(getRandomCellColorId());
         }
 
-        cells.push_back(tmp_vector);
+        m_cells.push_back(tmp_vector);
     }
 
     while (dataChanged) {
         auto cellsToRemove = checkBoard();
         if (cellsToRemove.size()) {
             for (const auto &index : cellsToRemove) {
-                int col =  index / dimentionY;
-                int row = index % dimentionY;
+                int col =  index / m_dimentionY;
+                int row = index % m_dimentionY;
                 removeElement(col, row, 0);
             }
         } else {
@@ -141,14 +135,14 @@ void Match3Model::generateCells()
 
 void Match3Model::removeElement(int col, int row, int addToScore)
 {
-    int index = col * dimentionY + row;
+    int index = col * m_dimentionY + row;
     beginRemoveRows(QModelIndex(), index, index);
     endRemoveRows();
 
-    cells[col].erase(cells[col].begin() + row);
+    m_cells[col].erase(m_cells[col].begin() + row);
 
-    beginInsertRows(QModelIndex(), col * dimentionY, col * dimentionY);
-    cells[col].push_front(getRandomCellColorId());
+    beginInsertRows(QModelIndex(), col * m_dimentionY, col * m_dimentionY);
+    m_cells[col].push_front(getRandomCellColorId());
     endInsertRows();
 
     increaseScore(addToScore);
@@ -159,18 +153,18 @@ void Match3Model::removeElement(int col, int row, int addToScore)
 
 int Match3Model::getRandomCellColorId()
 {
-    return rand() % cellTypes.size();
+    return rand() % m_cellTypes.size();
 }
 
 void Match3Model::increaseScore(int multiplicator)
 {
-    score += 10 + 2 * multiplicator;
+    m_score += 10 + 2 * multiplicator;
     emit scoreChanged();
 }
 
 void Match3Model::increaseMoveCounter()
 {
-    moveCounter++;
+    m_moveCounter++;
     emit moveCounterChanged();
 }
 
@@ -180,11 +174,11 @@ QList<int> Match3Model::swapCells(int sourceIndex, int targetIndex, bool reSwap)
         return QList<int>();
     }
 
-    int sourceCol =  sourceIndex / dimentionY;
-    int sourceRow = sourceIndex % dimentionY;
+    int sourceCol =  sourceIndex / m_dimentionY;
+    int sourceRow = sourceIndex % m_dimentionY;
 
-    int targetCol =  targetIndex / dimentionY;
-    int targetRow = targetIndex % dimentionY;
+    int targetCol =  targetIndex / m_dimentionY;
+    int targetRow = targetIndex % m_dimentionY;
 
     int shift = sourceIndex > targetIndex ? 0 : 1;
 
@@ -197,7 +191,7 @@ QList<int> Match3Model::swapCells(int sourceIndex, int targetIndex, bool reSwap)
         endMoveRows();
     }
 
-    swap(cells[sourceCol][sourceRow], cells[targetCol][targetRow]);
+    swap(m_cells[sourceCol][sourceRow], m_cells[targetCol][targetRow]);
     if (reSwap) {
         return QList<int>();
     }
@@ -210,27 +204,27 @@ QList<int> Match3Model::swapCells(int sourceIndex, int targetIndex, bool reSwap)
 QList<int> Match3Model::findCellsToRemove(int x, int y)
 {
     queue<pair<int, int>> checkQuery;
-    int matchArray[dimentionX * dimentionY];
-    fill_n(matchArray, dimentionX * dimentionY, 0);
+    int matchArray[m_dimentionX * m_dimentionY];
+    fill_n(matchArray, m_dimentionX * m_dimentionY, 0);
 
     checkQuery.push(pair<int, int>(x, y));
 
     while (!checkQuery.empty()) {
         int checkedX = checkQuery.front().first;
         int checkedY = checkQuery.front().second;
-        if (cells[x][y] == cells[checkedX][checkedY] && !matchArray[checkedX * dimentionY + checkedY]) {
-            matchArray[checkedX * dimentionY + checkedY] = 1;
+        if (m_cells[x][y] == m_cells[checkedX][checkedY] && !matchArray[checkedX * m_dimentionY + checkedY]) {
+            matchArray[checkedX * m_dimentionY + checkedY] = 1;
 
             if (checkedX > 0) {
                 checkQuery.push(pair<int, int>(checkedX - 1, checkedY));
             }
-            if (checkedX < dimentionX - 1) {
+            if (checkedX < m_dimentionX - 1) {
                 checkQuery.push(pair<int, int>(checkedX + 1, checkedY));
             }
             if (checkedY > 0) {
                 checkQuery.push(pair<int, int>(checkedX, checkedY - 1));
             }
-            if (checkedY < dimentionY - 1) {
+            if (checkedY < m_dimentionY - 1) {
                 checkQuery.push(pair<int, int>(checkedX, checkedY + 1));
             }
         }
@@ -247,10 +241,10 @@ QList<int> Match3Model::findMatch3Items(int *boardCells)
     int elementsMatch;
     QList<int> cellsToRemove;
     // check rows
-    for (int col = 0; col < dimentionX; ++col) {
+    for (int col = 0; col < m_dimentionX; ++col) {
         elementsMatch  = 0;
-        for (int row = 0; row < dimentionY; ++row) {
-            int cellIndex = col * dimentionY + row;
+        for (int row = 0; row < m_dimentionY; ++row) {
+            int cellIndex = col * m_dimentionY + row;
             if (boardCells[cellIndex]) {
                 elementsMatch++;
                 cellsToRemove.push_back(cellIndex);
@@ -263,17 +257,17 @@ QList<int> Match3Model::findMatch3Items(int *boardCells)
 
     if (!shuoldBeDeleted ) {
         // check cols
-        for (int row = 0; row < dimentionY; ++row) {
+        for (int row = 0; row < m_dimentionY; ++row) {
             elementsMatch  = 0;
-            for (int col = 0; col < dimentionX; ++col) {
-               if (boardCells[col * dimentionY + row]) {
+            for (int col = 0; col < m_dimentionX; ++col) {
+               if (boardCells[col * m_dimentionY + row]) {
                     elementsMatch++;
 
                     if (elementsMatch >= 3) {
                         shuoldBeDeleted = true;
                         // to exit
-                        col = dimentionX;
-                        row = dimentionY;
+                        col = m_dimentionX;
+                        row = m_dimentionY;
                     }
                 }
             }
@@ -296,8 +290,8 @@ QList<int> Match3Model::reSwapCells(int sourceIndex, int targetIndex)
 
 void Match3Model::removeCell(int index)
 {
-    int col =  index / dimentionY;
-    int row = index % dimentionY;
+    int col =  index / m_dimentionY;
+    int row = index % m_dimentionY;
 
     removeElement(col, row, 0);
 }
@@ -305,8 +299,8 @@ void Match3Model::removeCell(int index)
 QList<int> Match3Model::checkBoard()
 {
     QList<int> cellsList;
-    for (int col = 0; col < dimentionX; ++col) {
-        for (int row = 0; row < dimentionY; ++row) {
+    for (int col = 0; col < m_dimentionX; ++col) {
+        for (int row = 0; row < m_dimentionY; ++row) {
             cellsList += findCellsToRemove(col, row);
         }
     }

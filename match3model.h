@@ -62,14 +62,14 @@ private:
     QList<int> findCellsToRemove(int sourceCol, int sourceRow);
     QList<int> findMatch3Items(int *boardCells);
 private:
-   deque<deque<int> > cells;
-   int moveCounter;
-   int score;
-   int selectedSellIndex;
+   deque<deque<int> > m_cells;
+   int m_moveCounter;
+   int m_score;
+   int m_selectedSellIndex;
    // settings
-   QJsonArray cellTypes;
-   int dimentionX;
-   int dimentionY;
+   QJsonArray m_cellTypes;
+   int m_dimentionX;
+   int m_dimentionY;
 };
 
 
