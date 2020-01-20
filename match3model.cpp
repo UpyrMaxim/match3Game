@@ -20,7 +20,7 @@ QVariant Match3Model::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    int col =  index.row() / dimentionY;
+    int col = index.row() / dimentionY;
     int row = index.row() % dimentionY;
 
     if (role == Qt::DecorationRole) {
@@ -124,7 +124,7 @@ void Match3Model::generateCells()
 
     while (dataChanged) {
         auto cellsToRemove = checkBoard();
-        if(cellsToRemove.size()) {
+        if (cellsToRemove.size()) {
             for (const auto &index : cellsToRemove) {
                 int col =  index / dimentionY;
                 int row = index % dimentionY;
@@ -176,7 +176,7 @@ void Match3Model::increaseMoveCounter()
 
 QList<int> Match3Model::swapCells(int sourceIndex, int targetIndex, bool reSwap)
 {
-    if(sourceIndex == targetIndex || sourceIndex < 0 || targetIndex < 0) {
+    if (sourceIndex == targetIndex || sourceIndex < 0 || targetIndex < 0) {
         return QList<int>();
     }
 
@@ -193,7 +193,7 @@ QList<int> Match3Model::swapCells(int sourceIndex, int targetIndex, bool reSwap)
 
     if (abs(sourceIndex - targetIndex) > 1) {
         int zeroPositionShift = targetIndex > sourceIndex ? -1 : 1;
-        beginMoveRows(QModelIndex(), targetIndex + zeroPositionShift, targetIndex + zeroPositionShift,QModelIndex(), sourceIndex + shift + zeroPositionShift);
+        beginMoveRows(QModelIndex(), targetIndex + zeroPositionShift, targetIndex + zeroPositionShift, QModelIndex(), sourceIndex + shift + zeroPositionShift);
         endMoveRows();
     }
 
