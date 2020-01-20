@@ -19,31 +19,8 @@ Window {
         anchors.fill: parent
         color: "#deb887"
 
-        Rectangle {
-            y: 10
-            x: parent.width - 20 - width
-            width: 60
-            height: 20
-            radius: height / 2
-            color: resetButtonMouse.containsMouse ? "burlywood" : "blanchedalmond"
-            border {
-                color: "black"
-                width: 1
-            }
-
-            Text {
-                x: 10
-                text: "Reset"
-            }
-
-            MouseArea {
-                id: resetButtonMouse
-
-                hoverEnabled: true
-                anchors.fill: parent
-
-                onClicked: match3Model.resetGame()
-            }
+        ResetBtn {
+            gameModel: match3Model
         }
 
         ScoreField {

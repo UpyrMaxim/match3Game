@@ -4,5 +4,6 @@
         <file>setting.json</file>
         <file>GameBoard.qml</file>
         <file>ScoreField.qml</file>
+        <file>ResetBtn.qml</file>
     </qresource>
 </RCC>
