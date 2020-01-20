@@ -38,7 +38,6 @@ Rectangle {
 
         property int selectedIndex: -1
 
-        anchors.margins: 0
         anchors.fill: parent
         flow: GridView.FlowTopToBottom
         cellHeight: parent.height / gameModel.dimentionY
