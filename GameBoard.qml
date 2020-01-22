@@ -87,7 +87,7 @@ Rectangle {
                                     while (cellsToDestruct.length) {
                                         cellsToDestruct.forEach(element => gameModel.removeCell(element));
                                         cellsToDestruct = null;
-                                        cellsToDestruct = gameModel.checkBoard();
+                                        cellsToDestruct = gameModel.checkBoardCells();
                                     }
                                 } else {
                                     gameModel.reSwapCells(elementIndex, prevElementIndex);

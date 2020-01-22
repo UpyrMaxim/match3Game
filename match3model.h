@@ -11,7 +11,6 @@
 
 #include <QDebug>
 
-#include <deque>
 #include <queue>
 #include <algorithm>
 #include <cstdlib>
@@ -43,7 +42,8 @@ public:
     Q_INVOKABLE QList<int> swapCells(int sourceIndex, int targetIndex, bool reSwap = false);
     Q_INVOKABLE QList<int> reSwapCells(int sourceIndex, int targetIndex);
     Q_INVOKABLE void removeCell(int index);
-    Q_INVOKABLE QList<int> checkBoard();
+
+    Q_INVOKABLE QList<int> checkBoardCells();
 
 signals:
     void dimentionXChanged();
@@ -61,10 +61,13 @@ private:
 
     void removeAllMatches();
 
+    int checkCol(QVector< QVector<int> > &cells, int col, int row = 0, int value = 1);
+    int checkRow(QVector< QVector<int> > &cells, int row, int col = 0, int value = 1);
+
     QList<int> findCellsToRemove(int sourceCol, int sourceRow);
-    QList<int> findMatch3Items(int *boardCells);
+    QList<int> findMatch3Items(const QVector<QVector<bool> > &boardCells);
 private:
-   deque<deque<int> > m_cells;
+   QList<QList<int> > m_cells;
    int m_moveCounter;
    int m_score;
    int m_selectedSellIndex;
