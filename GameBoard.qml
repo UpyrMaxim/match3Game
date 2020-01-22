@@ -85,17 +85,17 @@ Rectangle {
                             delay(moveAnimation.duration, function() {
                                 if (cellsToDestruct.length) {
                                     while (cellsToDestruct.length) {
-                                        cellsToDestruct.forEach(element => gameModel.removeCell(element));
-                                        cellsToDestruct = null;
-                                        cellsToDestruct = gameModel.checkBoardCells();
+                                            cellsToDestruct.forEach(element => gameModel.removeCell(element));
+                                            cellsToDestruct = null;
+                                            cellsToDestruct = gameModel.checkBoardCells();
                                     }
                                 } else {
                                     gameModel.reSwapCells(elementIndex, prevElementIndex);
                                 }
                                 view.selectedIndex = -1;
-                            })
+                            });
                         } else {
-                            view. selectedIndex = index
+                            view. selectedIndex = index;
                         }
                     }
                 }
@@ -110,9 +110,13 @@ Rectangle {
         }
 
         add: Transition {
-             NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 600 }
-             NumberAnimation { property: "scale"; easing.type: Easing.OutBounce; from: 0; to: 1.0; duration: 950 }
-             NumberAnimation { properties: "y"; from: 0;  duration: 800; }
+            SequentialAnimation {
+                ParallelAnimation {
+                NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 600 }
+                NumberAnimation { id: addAnimation; property: "scale"; easing.type: Easing.OutBounce; from: 0; to: 1.0; duration: 950 }
+                NumberAnimation { properties: "y"; from: y;  duration: 800; }
+                }
+            }
          }
 
          addDisplaced: Transition {

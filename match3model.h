@@ -45,6 +45,7 @@ public:
 
     Q_INVOKABLE QList<int> checkBoardCells();
 
+
 signals:
     void dimentionXChanged();
     void dimentionYChanged();
@@ -63,9 +64,6 @@ private:
 
     int checkCol(QVector< QVector<int> > &cells, int col, int row = 0, int value = 1);
     int checkRow(QVector< QVector<int> > &cells, int row, int col = 0, int value = 1);
-
-    QList<int> findCellsToRemove(int sourceCol, int sourceRow);
-    QList<int> findMatch3Items(const QVector<QVector<bool> > &boardCells);
 private:
    QList<QList<int> > m_cells;
    int m_moveCounter;
