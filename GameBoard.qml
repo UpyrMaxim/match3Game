@@ -52,6 +52,8 @@ Rectangle {
             height: view.cellHeight
             width: view.cellWidth
 
+            scale: index === view.selectedIndex ? 0.8 : 1
+
             Rectangle {
                 id: cell
 
@@ -92,6 +94,8 @@ Rectangle {
                                 }
                                 view.selectedIndex = -1;
                             })
+                        } else {
+                            view. selectedIndex = index
                         }
                     }
                 }

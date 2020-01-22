@@ -59,6 +59,8 @@ private:
     void increaseMoveCounter();
     void removeElement(int col, int row, int addToScore);
 
+    void removeAllMatches();
+
     QList<int> findCellsToRemove(int sourceCol, int sourceRow);
     QList<int> findMatch3Items(int *boardCells);
 private:

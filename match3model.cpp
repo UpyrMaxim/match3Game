@@ -62,8 +62,8 @@ int Match3Model::getMoveCounter() const
 
 void Match3Model::resetGame()
 {
-        m_cells.clear();
         generateCells();
+        removeAllMatches();
 
         m_score = 0;
         emit scoreChanged();
@@ -101,9 +101,6 @@ void Match3Model::initByJson()
 
 void Match3Model::generateCells()
 {
-    bool dataChanged = true;
-
-    beginResetModel();
     m_cells.clear();
 
     for (int col = 0; col < m_dimentionX; ++col) {
@@ -115,21 +112,6 @@ void Match3Model::generateCells()
 
         m_cells.push_back(tmp_vector);
     }
-
-    while (dataChanged) {
-        auto cellsToRemove = checkBoard();
-        if (cellsToRemove.size()) {
-            for (const auto &index : cellsToRemove) {
-                int col =  index / m_dimentionY;
-                int row = index % m_dimentionY;
-                removeElement(col, row, 0);
-            }
-        } else {
-            dataChanged = false;
-        }
-    }
-
-    endResetModel();
 }
 
 
@@ -149,6 +131,27 @@ void Match3Model::removeElement(int col, int row, int addToScore)
 //    auto newIndex = createIndex(index,0);
 //    emit dataChanged(newIndex, newIndex, {Qt::DecorationRole});
 
+}
+
+void Match3Model::removeAllMatches()
+{
+    beginResetModel();
+
+    bool dataChanged = true;
+    while (dataChanged) {
+        auto cellsToRemove = checkBoard();
+        if (cellsToRemove.size()) {
+            for (const auto &index : cellsToRemove) {
+                int col =  index / m_dimentionY;
+                int row = index % m_dimentionY;
+                removeElement(col, row, 0);
+            }
+        } else {
+            dataChanged = false;
+        }
+    }
+
+    endResetModel();
 }
 
 int Match3Model::getRandomCellColorId()
