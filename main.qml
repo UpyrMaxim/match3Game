@@ -9,8 +9,8 @@ Window {
     x: { Screen.width / 2 - width / 2 }
     y: { Screen.height / 2 - height / 2 }
     visible: true
-    width: 340
-    height: width + 50
+    width: 500
+    height: width * match3Model.dimentionY / match3Model.dimentionX
     title: qsTr("Match 3")
 
     Rectangle {

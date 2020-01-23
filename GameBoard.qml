@@ -63,7 +63,7 @@ Rectangle {
             Rectangle {
                 id: cell
 
-                anchors.margins: 5
+                anchors.margins: width / 10
                 anchors.fill: parent
                 border {
                     color: "black"
