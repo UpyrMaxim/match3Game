@@ -6,10 +6,11 @@ Rectangle {
 
     property var gameModel: ({ })
 
-    y: 40
-    x: 10
-    width: parent.width - 20
-    height: width + 20
+    anchors {
+        fill: parent
+        margins: 10
+        topMargin: 40
+    }
     color: "#ffe4c4"
 
     function delay(delayTime, func) {
@@ -114,7 +115,7 @@ Rectangle {
                 ParallelAnimation {
                     NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 600 }
                     NumberAnimation { id: addAnimation; property: "scale"; easing.type: Easing.OutBounce; from: 0; to: 1.0; duration: 950 }
-                    NumberAnimation { properties: "y"; from: y;  duration: 800 }
+                    NumberAnimation { properties: "y"; from:  -150 ;  duration: 500 }
                 }
                 ScriptAction {
                     script: {
