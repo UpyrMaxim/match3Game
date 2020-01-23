@@ -24,12 +24,12 @@ Window {
         }
 
         ScoreField {
-            textProp:  "Score: " + match3Model.score;
+            textProp:  "Score: " + match3Model.score
             xPosition: 10
         }
 
         ScoreField {
-            textProp:  "Moves: " + match3Model.moveCounter;
+            textProp:  "Moves: " + match3Model.moveCounter
              xPosition: 100
         }
 

@@ -4,7 +4,7 @@ import QtQuick 2.0
 Rectangle {
     id: gameBoard
 
-    property var gameModel: ({})
+    property var gameModel: ({ })
 
     y: 40
     x: 10
@@ -25,7 +25,7 @@ Rectangle {
 
         property var handler: function() {}
 
-        repeat: false;
+        repeat: false
 
         onTriggered: {
             handler();
@@ -37,7 +37,12 @@ Rectangle {
         id: view
 
         property int selectedIndex: -1
-
+        property var removeCells: function () {
+                view.cellsToDestruct = null;
+                view.cellsToDestruct = gameModel.checkBoardCells();
+                view.cellsToDestruct.forEach(element => gameModel.removeCell(element));
+        }
+        property var cellsToDestruct: []
         anchors.fill: parent
         flow: GridView.FlowTopToBottom
         cellHeight: parent.height / gameModel.dimentionY
@@ -71,7 +76,6 @@ Rectangle {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-
                     if(view.selectedIndex < 0) {
                         view. selectedIndex = index;
                     } else {
@@ -80,15 +84,11 @@ Rectangle {
                         if (swapIsValid) {
                             var elementIndex = index;
                             var prevElementIndex = view.selectedIndex;
-                            var cellsToDestruct = gameModel.swapCells(view.selectedIndex, elementIndex);
+                            view.cellsToDestruct = gameModel.swapCells(view.selectedIndex, elementIndex);
 
                             delay(moveAnimation.duration, function() {
-                                if (cellsToDestruct.length) {
-                                    while (cellsToDestruct.length) {
-                                            cellsToDestruct.forEach(element => gameModel.removeCell(element));
-                                            cellsToDestruct = null;
-                                            cellsToDestruct = gameModel.checkBoardCells();
-                                    }
+                                if (view.cellsToDestruct.length) {
+                                    view.cellsToDestruct.forEach(element => gameModel.removeCell(element));
                                 } else {
                                     gameModel.reSwapCells(elementIndex, prevElementIndex);
                                 }
@@ -106,15 +106,22 @@ Rectangle {
                NumberAnimation { id: moveAnimation; properties: "x,y"; duration: 400; alwaysRunToEnd: true }
         }
         moveDisplaced: Transition {
-            NumberAnimation { properties: "x,y"; duration: 400; }
+            NumberAnimation { properties: "x,y"; duration: 400 }
         }
 
         add: Transition {
             SequentialAnimation {
                 ParallelAnimation {
-                NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 600 }
-                NumberAnimation { id: addAnimation; property: "scale"; easing.type: Easing.OutBounce; from: 0; to: 1.0; duration: 950 }
-                NumberAnimation { properties: "y"; from: y;  duration: 800; }
+                    NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 600 }
+                    NumberAnimation { id: addAnimation; property: "scale"; easing.type: Easing.OutBounce; from: 0; to: 1.0; duration: 950 }
+                    NumberAnimation { properties: "y"; from: y;  duration: 800 }
+                }
+                ScriptAction {
+                    script: {
+                        if (view.cellsToDestruct.length) {
+                            view.removeCells();
+                        }
+                    }
                 }
             }
          }

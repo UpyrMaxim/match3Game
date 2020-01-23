@@ -1,20 +1,7 @@
-#ifndef Match3Model_H
-#define Match3Model_H
+#pragma once
 
 #include <QAbstractListModel>
-#include <QFile>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QCoreApplication>
 #include <QJsonArray>
-#include <QColor>
-
-#include <QDebug>
-
-#include <queue>
-#include <algorithm>
-#include <cstdlib>
-#include <ctime>
 
 
 using namespace std;
@@ -62,8 +49,9 @@ private:
 
     void removeAllMatches();
 
-    int checkCol(QVector< QVector<int> > &cells, int col, int row = 0, int value = 1);
-    int checkRow(QVector< QVector<int> > &cells, int row, int col = 0, int value = 1);
+    int checkCol(QVector< QVector<int> > &cells, int col, int row, int value = 1);
+    int checkRow(QVector< QVector<int> > &cells, int col, int row, int value = 1);
+    int checkMatch(QVector< QVector<int> > &cells, int row, const bool colChecking, int col = 0, int value = 1);
 private:
    QList<QList<int> > m_cells;
    int m_moveCounter;
@@ -74,7 +62,3 @@ private:
    int m_dimentionX;
    int m_dimentionY;
 };
-
-
-
-#endif // Match3Model_H

@@ -1,4 +1,14 @@
 #include "match3model.h"
+#include <algorithm>
+#include <cstdlib>
+#include <ctime>
+
+#include <QColor>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+
+#include <QDebug>
 
 #define MIN_MATCH 3
 
@@ -64,41 +74,41 @@ int Match3Model::getMoveCounter() const
 
 void Match3Model::resetGame()
 {
-        generateCells();
-        removeAllMatches();
+    generateCells();
+    removeAllMatches();
 
-        m_score = 0;
-        emit scoreChanged();
+    m_score = 0;
+    emit scoreChanged();
 
-        m_moveCounter = 0;
-        emit moveCounterChanged();
+    m_moveCounter = 0;
+    emit moveCounterChanged();
 
-        m_selectedSellIndex = -1;
+    m_selectedSellIndex = -1;
 }
 
 
 void Match3Model::initByJson()
 {
-      QString val;
-      QFile file;
-      file.setFileName(":/setting.json");
-      if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-          qWarning() << "Setting file is not exists";
-          return;
-      }
-      val = file.readAll();
-      file.close();
+    QString val;
+    QFile file;
+    file.setFileName(":/setting.json");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      qWarning() << "Setting file is not exists";
+      return;
+    }
+    val = file.readAll();
+    file.close();
 
-      // get json content
-      QJsonDocument document = QJsonDocument::fromJson(val.toUtf8());
-      QJsonObject jsonObject = document.object();
-      QJsonObject board = jsonObject.value(QString("board")).toObject();
+    // get json content
+    QJsonDocument document = QJsonDocument::fromJson(val.toUtf8());
+    QJsonObject jsonObject = document.object();
+    QJsonObject board = jsonObject.value(QString("board")).toObject();
 
-      // set dimention values
-      m_dimentionY = board["height"].toInt();
-      m_dimentionX = board["width"].toInt();
-      // set cells types
-      m_cellTypes = jsonObject.value(QString("itemTypes")).toArray();
+    // set dimention values
+    m_dimentionY = MIN_MATCH > board["height"].toInt() ? MIN_MATCH : board["height"].toInt();
+    m_dimentionX = MIN_MATCH > board["width"].toInt() ?  MIN_MATCH : board["width"].toInt();
+    // set cells types
+    m_cellTypes = jsonObject.value(QString("itemTypes")).toArray();
 }
 
 void Match3Model::generateCells()
@@ -130,9 +140,6 @@ void Match3Model::removeElement(int col, int row, int addToScore)
     endInsertRows();
 
     increaseScore(addToScore);
-//    auto newIndex = createIndex(index,0);
-//    emit dataChanged(newIndex, newIndex, {Qt::DecorationRole});
-
 }
 
 void Match3Model::removeAllMatches()
@@ -227,31 +234,30 @@ QList<int> Match3Model::checkBoardCells()
 
 
     for(int col = 0; col < m_dimentionX; ++col) {
-        checkCol(checkCols, col);
+        checkCol(checkCols, col, 0);
     }
      for(int row = 0; row < m_dimentionY; ++row) {
-        checkRow(checkRows, row);
+        checkRow(checkRows, 0, row);
     }
 
     for (int col = 0; col < m_dimentionX; ++col) {
           for (int row = 0; row < m_dimentionY; ++row) {
-              if ( max(checkCols[col][row],checkRows[col][row]) >= MIN_MATCH ) {
+              if ( max(checkCols[col][row], checkRows[col][row]) >= MIN_MATCH ) {
                   removeCells.push_back(col * m_dimentionY + row);
               }
           }
     }
 
     return removeCells;
-
 }
 
 
 int Match3Model::checkCol(QVector<QVector<int> > &cells, int col, int row,int value)
 {
     bool equal;
-    if (row >= m_dimentionY - 1) {
-        equal = m_cells[col][row] == m_cells[col][row - 1];
-        return value + equal;
+    if (row == m_dimentionY - 1) {
+        cells[col][row] = value;
+        return value;
     }
 
     equal = m_cells[col][row] == m_cells[col][row + 1];
@@ -267,17 +273,17 @@ int Match3Model::checkCol(QVector<QVector<int> > &cells, int col, int row,int va
     return value;
 }
 
-int Match3Model::checkRow(QVector<QVector<int> > &cells, int row, int col, int value)
+int Match3Model::checkRow(QVector<QVector<int> > &cells, int col, int row, int value)
 {
     bool equal;
-    if (col >= m_dimentionX - 1) {
-        equal = m_cells[col][row] == m_cells[col - 1][row];
-        return value + equal;
+    if (col == m_dimentionX - 1) {
+        cells[col][row] = value;
+        return value;
     }
 
     equal = m_cells[col][row] == m_cells[col + 1][row];
     int newValue = equal ? value + 1 : 1;
-    int v = checkRow(cells, row, col + 1, newValue);
+    int v = checkRow(cells, col + 1, row, newValue);
 
     if (equal) {
         value = v;
