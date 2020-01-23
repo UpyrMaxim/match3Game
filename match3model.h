@@ -56,7 +56,6 @@ private:
    QList<QList<int> > m_cells;
    int m_moveCounter;
    int m_score;
-   int m_selectedSellIndex;
    // settings
    QJsonArray m_cellTypes;
    int m_dimentionX;

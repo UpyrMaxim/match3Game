@@ -13,7 +13,7 @@
 #define MIN_MATCH 3
 
 Match3Model::Match3Model(QObject *parent, const int dimentionX, const int dimentionY)
-    : QAbstractListModel(parent), m_moveCounter(0),  m_score(0), m_selectedSellIndex(-1), m_dimentionX(dimentionX), m_dimentionY(dimentionY)
+    : QAbstractListModel(parent), m_moveCounter(0),  m_score(0), m_dimentionX(dimentionX), m_dimentionY(dimentionY)
 {
     srand (time(nullptr));
 
@@ -74,6 +74,8 @@ int Match3Model::getMoveCounter() const
 
 void Match3Model::resetGame()
 {
+    beginResetModel();
+
     generateCells();
     removeAllMatches();
 
@@ -83,7 +85,7 @@ void Match3Model::resetGame()
     m_moveCounter = 0;
     emit moveCounterChanged();
 
-    m_selectedSellIndex = -1;
+    endResetModel();
 }
 
 
@@ -144,8 +146,6 @@ void Match3Model::removeElement(int col, int row, int addToScore)
 
 void Match3Model::removeAllMatches()
 {
-    beginResetModel();
-
     bool dataChanged = true;
     while (dataChanged) {
         auto cellsToRemove = checkBoardCells();
@@ -159,8 +159,6 @@ void Match3Model::removeAllMatches()
             dataChanged = false;
         }
     }
-
-    endResetModel();
 }
 
 int Match3Model::getRandomCellColorId()
