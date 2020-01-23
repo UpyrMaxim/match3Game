@@ -11,6 +11,7 @@ Rectangle {
         margins: 10
         topMargin: 40
     }
+
     color: "#ffe4c4"
 
     function delay(delayTime, func) {
@@ -18,13 +19,12 @@ Rectangle {
         timer.interval = delayTime;
         timer.handler = func;
         timer.start();
-
     }
 
     Timer {
         id: timer
 
-        property var handler: function() {}
+        property var handler: function() { }
 
         repeat: false
 
@@ -38,12 +38,14 @@ Rectangle {
         id: view
 
         property int selectedIndex: -1
-        property var removeCells: function () {
+        property var cellsToDestruct: []
+
+        function removeCells () {
                 view.cellsToDestruct = null;
                 view.cellsToDestruct = gameModel.checkBoardCells();
                 view.cellsToDestruct.forEach(element => gameModel.removeCell(element));
         }
-        property var cellsToDestruct: []
+
         anchors.fill: parent
         flow: GridView.FlowTopToBottom
         cellHeight: parent.height / gameModel.dimentionY
@@ -57,7 +59,6 @@ Rectangle {
 
             height: view.cellHeight
             width: view.cellWidth
-
             scale: index === view.selectedIndex ? 0.8 : 1
 
             Rectangle {
@@ -65,22 +66,26 @@ Rectangle {
 
                 anchors.margins: width / 10
                 anchors.fill: parent
+
                 border {
                     color: "black"
-                    width: 1
+                    width: 2
                 }
-                radius: width
+
+                radius: (width + height) / 2
                 visible: true
                 color: decoration
             }
 
             MouseArea {
                 anchors.fill: parent
+
                 onClicked: {
-                    if(view.selectedIndex < 0) {
-                        view. selectedIndex = index;
+                    if (view.selectedIndex < 0) {
+                        view.selectedIndex = index;
                     } else {
-                        let swapIsValid = Math.abs(view.selectedIndex - index) == 1 || Math.abs(view.selectedIndex - index) === gameModel.dimentionY;
+                        let indexesDifference = Math.abs(view.selectedIndex - index);
+                        let swapIsValid = indexesDifference === 1 || indexesDifference === gameModel.dimentionY;
 
                         if (swapIsValid) {
                             var elementIndex = index;
@@ -96,7 +101,7 @@ Rectangle {
                                 view.selectedIndex = -1;
                             });
                         } else {
-                            view. selectedIndex = index;
+                            view.selectedIndex = index;
                         }
                     }
                 }
@@ -106,6 +111,7 @@ Rectangle {
         move: Transition {
                NumberAnimation { id: moveAnimation; properties: "x,y"; duration: 400; alwaysRunToEnd: true }
         }
+
         moveDisplaced: Transition {
             NumberAnimation { properties: "x,y"; duration: 400 }
         }

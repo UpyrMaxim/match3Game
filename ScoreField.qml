@@ -11,7 +11,7 @@ Rectangle {
 
     width: 100
     height: 20
-    radius: height / 2
+    radius: 5
 
     Text {
         x: 10

@@ -11,6 +11,12 @@ Window {
     visible: true
     width: 500
     height: width * match3Model.dimentionY / match3Model.dimentionX
+
+    minimumWidth: 300;
+    minimumHeight: 400;
+    maximumWidth: 2 * height
+    maximumHeight: 2 * width
+
     title: qsTr("Match 3")
 
     Rectangle {
@@ -24,18 +30,21 @@ Window {
         }
 
         ScoreField {
+            id: leftScoreField
+
             textProp:  "Score: " + match3Model.score
             xPosition: 10
         }
 
         ScoreField {
             textProp:  "Moves: " + match3Model.moveCounter
-             xPosition: 100
+            xPosition: leftScoreField.width
         }
 
         Match3Model {
             id: match3Model
         }
+
         GameBoard {
             gameModel: match3Model
         }
