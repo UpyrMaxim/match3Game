@@ -53,11 +53,13 @@ private:
     int checkRow(QVector< QVector<int> > &cells, int col, int row, int value = 1);
     int checkMatch(QVector< QVector<int> > &cells, int row, const bool colChecking, int col = 0, int value = 1);
 private:
-   QList<QList<int> > m_cells;
-   int m_moveCounter;
-   int m_score;
-   // settings
-   QJsonArray m_cellTypes;
-   int m_dimentionX;
-   int m_dimentionY;
+    const int minMatch = 3;
+
+    QList<QList<int> > m_cells;
+    int m_moveCounter;
+    int m_score;
+    // settings
+    QJsonArray m_cellTypes;
+    int m_dimentionX;
+    int m_dimentionY;
 };

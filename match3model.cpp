@@ -10,8 +10,6 @@
 
 #include <QDebug>
 
-#define MIN_MATCH 3
-
 Match3Model::Match3Model(QObject *parent, const int dimentionX, const int dimentionY)
     : QAbstractListModel(parent), m_moveCounter(0),  m_score(0), m_dimentionX(dimentionX), m_dimentionY(dimentionY)
 {
@@ -107,8 +105,8 @@ void Match3Model::initByJson()
     QJsonObject board = jsonObject.value(QString("board")).toObject();
 
     // set dimention values
-    m_dimentionY = MIN_MATCH > board["height"].toInt() ? MIN_MATCH : board["height"].toInt();
-    m_dimentionX = MIN_MATCH > board["width"].toInt() ?  MIN_MATCH : board["width"].toInt();
+    m_dimentionY = minMatch > board["height"].toInt() ? minMatch : board["height"].toInt();
+    m_dimentionX = minMatch > board["width"].toInt() ?  minMatch : board["width"].toInt();
     // set cells types
     m_cellTypes = jsonObject.value(QString("itemTypes")).toArray();
 }
@@ -133,9 +131,8 @@ void Match3Model::removeElement(int col, int row, int addToScore)
 {
     int index = col * m_dimentionY + row;
     beginRemoveRows(QModelIndex(), index, index);
+    m_cells[col].removeAt(row);
     endRemoveRows();
-
-    m_cells[col].erase(m_cells[col].begin() + row);
 
     beginInsertRows(QModelIndex(), col * m_dimentionY, col * m_dimentionY);
     m_cells[col].push_front(getRandomCellColorId());
@@ -225,9 +222,9 @@ void Match3Model::removeCell(int index)
 
 QList<int> Match3Model::checkBoardCells()
 {
-    typedef QVector<int> inner;
-    QVector<inner> checkRows(m_dimentionX, inner(m_dimentionY));
-    QVector<inner> checkCols(m_dimentionX, inner(m_dimentionY));
+    typedef QVector<int> Inner;
+    QVector<Inner> checkRows(m_dimentionX, Inner(m_dimentionY));
+    QVector<Inner> checkCols(m_dimentionX, Inner(m_dimentionY));
     QList<int> removeCells;
 
 
@@ -240,7 +237,7 @@ QList<int> Match3Model::checkBoardCells()
 
     for (int col = 0; col < m_dimentionX; ++col) {
           for (int row = 0; row < m_dimentionY; ++row) {
-              if ( max(checkCols[col][row], checkRows[col][row]) >= MIN_MATCH ) {
+              if ( max(checkCols[col][row], checkRows[col][row]) >= minMatch ) {
                   removeCells.push_back(col * m_dimentionY + row);
               }
           }
@@ -252,13 +249,12 @@ QList<int> Match3Model::checkBoardCells()
 
 int Match3Model::checkCol(QVector<QVector<int> > &cells, int col, int row,int value)
 {
-    bool equal;
     if (row == m_dimentionY - 1) {
         cells[col][row] = value;
         return value;
     }
 
-    equal = m_cells[col][row] == m_cells[col][row + 1];
+    bool equal = m_cells[col][row] == m_cells[col][row + 1];
     int newValue = equal ? value + 1 : 1;
     int v = checkCol(cells, col, row + 1, newValue);
 
@@ -273,13 +269,12 @@ int Match3Model::checkCol(QVector<QVector<int> > &cells, int col, int row,int va
 
 int Match3Model::checkRow(QVector<QVector<int> > &cells, int col, int row, int value)
 {
-    bool equal;
     if (col == m_dimentionX - 1) {
         cells[col][row] = value;
         return value;
     }
 
-    equal = m_cells[col][row] == m_cells[col + 1][row];
+    bool equal = m_cells[col][row] == m_cells[col + 1][row];
     int newValue = equal ? value + 1 : 1;
     int v = checkRow(cells, col + 1, row, newValue);
 
