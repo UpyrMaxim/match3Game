@@ -264,13 +264,13 @@ int Match3Model::checkCol(QVector<QVector<int> > &cells, int col, int row,int va
 
     bool equal = m_cells[col][row] == m_cells[col][row + 1];
     int newValue = equal ? value + 1 : 1;
-    int matches = checkCol(cells, col, row + 1, newValue);
+    int matchesCount = checkCol(cells, col, row + 1, newValue);
 
     if (equal) {
-        value = matches;
+        value = matchesCount;
     }
 
-    cells[col][row] = matches;
+    cells[col][row] = matchesCount;
 
     return value;
 }
@@ -284,13 +284,13 @@ int Match3Model::checkRow(QVector<QVector<int> > &cells, int col, int row, int v
 
     bool equal = m_cells[col][row] == m_cells[col + 1][row];
     int newValue = equal ? value + 1 : 1;
-    int matches = checkRow(cells, col + 1, row, newValue);
+    int matchesCount = checkRow(cells, col + 1, row, newValue);
 
     if (equal) {
-        value = matches;
+        value = matchesCount;
     }
 
-    cells[col][row] = matches;
+    cells[col][row] = matchesCount;
 
     return value;
 }
