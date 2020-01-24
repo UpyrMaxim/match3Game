@@ -10,6 +10,7 @@ Rectangle {
     height: 20
     radius: height / 2
     color: resetButtonMouse.containsMouse ? "burlywood" : "blanchedalmond"
+
     border {
         color: "black"
         width: 1

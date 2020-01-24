@@ -70,6 +70,7 @@ Rectangle {
                     }
                 }
             }
+
             states: State {
                 name: "fail";
                 PropertyChanges { target: delegateItem; }

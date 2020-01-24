@@ -146,6 +146,7 @@ void Match3Model::removeAllMatches()
     bool dataChanged = true;
     while (dataChanged) {
         checkBoardCells();
+
         if (m_cellsToRemove.size()) {
             for (const auto &index : m_cellsToRemove) {
                 int col =  index / m_dimentionY;
@@ -209,6 +210,7 @@ bool Match3Model::swapCells(int sourceIndex, int targetIndex)
         beginMoveRows(QModelIndex(), targetIndex + zeroPositionShift, targetIndex + zeroPositionShift, QModelIndex(), sourceIndex + shift + zeroPositionShift);
         endMoveRows();
     }
+
     increaseMoveCounter();
 
     return true;
@@ -226,6 +228,7 @@ void Match3Model::removeCells()
         int row = index % m_dimentionY;
         removeElement(col, row, 0);
     }
+
     checkBoardCells();
 }
 
@@ -239,18 +242,18 @@ void Match3Model::checkBoardCells()
     for(int col = 0; col < m_dimentionX; ++col) {
         checkCol(checkCols, col, 0);
     }
-     for(int row = 0; row < m_dimentionY; ++row) {
-        checkRow(checkRows, 0, row);
+    for(int row = 0; row < m_dimentionY; ++row) {
+       checkRow(checkRows, 0, row);
     }
 
     m_cellsToRemove.clear();
 
     for (int col = 0; col < m_dimentionX; ++col) {
-          for (int row = 0; row < m_dimentionY; ++row) {
-              if ( max(checkCols[col][row], checkRows[col][row]) >= minMatch ) {
-                  m_cellsToRemove.push_back(col * m_dimentionY + row);
-              }
-          }
+        for (int row = 0; row < m_dimentionY; ++row) {
+            if ( max(checkCols[col][row], checkRows[col][row]) >= minMatch ) {
+                m_cellsToRemove.push_back(col * m_dimentionY + row);
+            }
+        }
     }
 }
 
