@@ -4,6 +4,7 @@ import QtQuick 2.0
 Rectangle {
     id: gameBoard
 
+
     property var gameModel: ({ })
 
     anchors {
@@ -14,44 +15,20 @@ Rectangle {
 
     color: "#ffe4c4"
 
-    function delay(delayTime, func) {
-        timer.restart();
-        timer.interval = delayTime;
-        timer.handler = func;
-        timer.start();
-    }
-
-    Timer {
-        id: timer
-
-        property var handler: function() { }
-
-        repeat: false
-
-        onTriggered: {
-            handler();
-        }
-    }
-
-
     GridView {
         id: view
 
         property int selectedIndex: -1
         property var cellsToDestruct: []
 
-        function removeCells () {
-                view.cellsToDestruct = null;
-                view.cellsToDestruct = gameModel.checkBoardCells();
-                view.cellsToDestruct.forEach(element => gameModel.removeCell(element));
+        anchors {
+            fill: parent
         }
 
-        anchors.fill: parent
         flow: GridView.FlowTopToBottom
         cellHeight: parent.height / gameModel.dimentionY
         cellWidth: parent.width / gameModel.dimentionX
         model: gameModel
-        clip: true
         interactive: false
 
         delegate: Item {
@@ -64,7 +41,7 @@ Rectangle {
             Rectangle {
                 id: cell
 
-                anchors.margins: width / 10
+                anchors.margins: 4
                 anchors.fill: parent
 
                 border {
@@ -84,24 +61,47 @@ Rectangle {
                     if (view.selectedIndex < 0) {
                         view.selectedIndex = index;
                     } else {
-                        let indexesDifference = Math.abs(view.selectedIndex - index);
-                        let swapIsValid = indexesDifference === 1 || indexesDifference === gameModel.dimentionY;
+                        if (!gameModel.swapCells(view.selectedIndex, index)) {
+                            delegateItem.state = "fail";
+                            view.currentIndex = model.index + (view.selectedIndex - index);
+                            view.currentItem.state = "fail";
+                        }
+                        view.selectedIndex = -1;
+                    }
+                }
+            }
+            states: State {
+                name: "fail";
+                PropertyChanges { target: delegateItem; }
+            }
 
-                        if (swapIsValid) {
-                            var elementIndex = index;
-                            var prevElementIndex = view.selectedIndex;
-                            view.cellsToDestruct = gameModel.swapCells(view.selectedIndex, elementIndex);
+            transitions: Transition {
+                from: "*"
+                to: "fail"
+                SequentialAnimation {
+                    SequentialAnimation {
+                        loops: 4
 
-                            delay(moveAnimation.duration, function() {
-                                if (view.cellsToDestruct.length) {
-                                    view.cellsToDestruct.forEach(element => gameModel.removeCell(element));
-                                } else {
-                                    gameModel.reSwapCells(elementIndex, prevElementIndex);
-                                }
-                                view.selectedIndex = -1;
-                            });
-                        } else {
-                            view.selectedIndex = index;
+                        NumberAnimation {
+                            target: delegateItem
+                            property: "scale"
+                            from: 1.2
+                            to: 1
+                            duration: 50
+                            easing.type: Easing.InOutBack
+                        }
+                        NumberAnimation {
+                            target: delegateItem
+                            property: "scale"
+                            from: 0.8
+                            to: 1
+                            duration: 50
+                            easing.type: Easing.InOutBack
+                        }
+                    }
+                    ScriptAction {
+                        script: {
+                            delegateItem.state = "default";
                         }
                     }
                 }
@@ -109,7 +109,14 @@ Rectangle {
         }
 
         move: Transition {
+            SequentialAnimation {
                NumberAnimation { id: moveAnimation; properties: "x,y"; duration: 400; alwaysRunToEnd: true }
+               ScriptAction {
+                   script: {
+                       gameModel.removeCells();
+                   }
+               }
+            }
         }
 
         moveDisplaced: Transition {
@@ -120,29 +127,26 @@ Rectangle {
             SequentialAnimation {
                 ParallelAnimation {
                     NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 600 }
-                    NumberAnimation { id: addAnimation; property: "scale"; easing.type: Easing.OutBounce; from: 0; to: 1.0; duration: 950 }
-                    NumberAnimation { properties: "y"; from:  -150 ;  duration: 500 }
-                }
-                ScriptAction {
-                    script: {
-                        if (view.cellsToDestruct.length) {
-                            view.removeCells();
-                        }
-                    }
+                    NumberAnimation { properties: "y"; from:  -(view.height - y) ;  duration: 600 }
                 }
             }
-         }
+        }
 
-         addDisplaced: Transition {
-             NumberAnimation { properties: "x,y"; duration: 400; easing.type: Easing.InBack }
-         }
+        addDisplaced: Transition {
+            SequentialAnimation {
+               NumberAnimation {id: moveOnAdd; properties: "x,y"; duration: 600; easing.type: Easing.InBack }
+               ScriptAction {
+                   script:  gameModel.removeCells();
+               }
+            }
+        }
 
-         remove: Transition {
-             NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: 400 }
-         }
+        remove: Transition {
+            NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: 400 }
+        }
 
-         removeDisplaced: Transition {
-             NumberAnimation { properties: "x,y"; duration: 400; easing.type: Easing.OutBack }
-         }
+        removeDisplaced: Transition {
+            NumberAnimation { properties: "x,y"; duration: 400; easing.type: Easing.OutBack }
+        }
     }
 }

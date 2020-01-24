@@ -145,13 +145,14 @@ void Match3Model::removeAllMatches()
 {
     bool dataChanged = true;
     while (dataChanged) {
-        auto cellsToRemove = checkBoardCells();
-        if (cellsToRemove.size()) {
-            for (const auto &index : cellsToRemove) {
+        checkBoardCells();
+        if (m_cellsToRemove.size()) {
+            for (const auto &index : m_cellsToRemove) {
                 int col =  index / m_dimentionY;
                 int row = index % m_dimentionY;
                 removeElement(col, row, 0);
             }
+            m_cellsToRemove.clear();
         } else {
             dataChanged = false;
         }
@@ -175,10 +176,13 @@ void Match3Model::increaseMoveCounter()
     emit moveCounterChanged();
 }
 
-QList<int> Match3Model::swapCells(int sourceIndex, int targetIndex, bool reSwap)
+bool Match3Model::swapCells(int sourceIndex, int targetIndex)
 {
-    if (sourceIndex == targetIndex || sourceIndex < 0 || targetIndex < 0) {
-        return QList<int>();
+    int indexesDifference = abs(sourceIndex - targetIndex);
+    bool swapIsValid = indexesDifference == 1 || indexesDifference == m_dimentionY;
+
+    if (!swapIsValid || sourceIndex < 0 || targetIndex < 0) {
+        return false;
     }
 
     int sourceCol =  sourceIndex / m_dimentionY;
@@ -186,6 +190,14 @@ QList<int> Match3Model::swapCells(int sourceIndex, int targetIndex, bool reSwap)
 
     int targetCol =  targetIndex / m_dimentionY;
     int targetRow = targetIndex % m_dimentionY;
+
+    swap(m_cells[sourceCol][sourceRow], m_cells[targetCol][targetRow]);
+    checkBoardCells();
+
+    if (!m_cellsToRemove.size()) {
+        swap(m_cells[sourceCol][sourceRow], m_cells[targetCol][targetRow]);
+        return false;
+    }
 
     int shift = sourceIndex > targetIndex ? 0 : 1;
 
@@ -197,35 +209,31 @@ QList<int> Match3Model::swapCells(int sourceIndex, int targetIndex, bool reSwap)
         beginMoveRows(QModelIndex(), targetIndex + zeroPositionShift, targetIndex + zeroPositionShift, QModelIndex(), sourceIndex + shift + zeroPositionShift);
         endMoveRows();
     }
+    increaseMoveCounter();
 
-    swap(m_cells[sourceCol][sourceRow], m_cells[targetCol][targetRow]);
-    if (reSwap) {
-        return QList<int>();
+    return true;
+}
+
+void Match3Model::removeCells()
+{
+
+    if (!m_cellsToRemove.size()) {
+        return;
     }
 
-    increaseMoveCounter();
-    return checkBoardCells();
+    for (const int &index : m_cellsToRemove) {
+        int col =  index / m_dimentionY;
+        int row = index % m_dimentionY;
+        removeElement(col, row, 0);
+    }
+    checkBoardCells();
 }
 
-QList<int> Match3Model::reSwapCells(int sourceIndex, int targetIndex)
-{
-    return swapCells(sourceIndex, targetIndex, true);
-}
-
-void Match3Model::removeCell(int index)
-{
-    int col =  index / m_dimentionY;
-    int row = index % m_dimentionY;
-
-    removeElement(col, row, 0);
-}
-
-QList<int> Match3Model::checkBoardCells()
+void Match3Model::checkBoardCells()
 {
     typedef QVector<int> Inner;
     QVector<Inner> checkRows(m_dimentionX, Inner(m_dimentionY));
     QVector<Inner> checkCols(m_dimentionX, Inner(m_dimentionY));
-    QList<int> removeCells;
 
 
     for(int col = 0; col < m_dimentionX; ++col) {
@@ -235,15 +243,15 @@ QList<int> Match3Model::checkBoardCells()
         checkRow(checkRows, 0, row);
     }
 
+    m_cellsToRemove.clear();
+
     for (int col = 0; col < m_dimentionX; ++col) {
           for (int row = 0; row < m_dimentionY; ++row) {
               if ( max(checkCols[col][row], checkRows[col][row]) >= minMatch ) {
-                  removeCells.push_back(col * m_dimentionY + row);
+                  m_cellsToRemove.push_back(col * m_dimentionY + row);
               }
           }
     }
-
-    return removeCells;
 }
 
 

@@ -3,7 +3,6 @@
 #include <QAbstractListModel>
 #include <QJsonArray>
 
-
 using namespace std;
 class Match3Model : public QAbstractListModel
 {
@@ -26,11 +25,8 @@ public:
     int getMoveCounter() const;
 
     Q_INVOKABLE void resetGame();
-    Q_INVOKABLE QList<int> swapCells(int sourceIndex, int targetIndex, bool reSwap = false);
-    Q_INVOKABLE QList<int> reSwapCells(int sourceIndex, int targetIndex);
-    Q_INVOKABLE void removeCell(int index);
-
-    Q_INVOKABLE QList<int> checkBoardCells();
+    Q_INVOKABLE bool swapCells(int sourceIndex, int targetIndex);
+    Q_INVOKABLE void removeCells();
 
 
 signals:
@@ -51,7 +47,8 @@ private:
 
     int checkCol(QVector< QVector<int> > &cells, int col, int row, int value = 1);
     int checkRow(QVector< QVector<int> > &cells, int col, int row, int value = 1);
-    int checkMatch(QVector< QVector<int> > &cells, int row, const bool colChecking, int col = 0, int value = 1);
+
+    void checkBoardCells();
 private:
     const int minMatch = 3;
 
@@ -59,6 +56,7 @@ private:
     int m_moveCounter;
     int m_score;
     // settings
+    QList<int> m_cellsToRemove;
     QJsonArray m_cellTypes;
     int m_dimentionX;
     int m_dimentionY;
