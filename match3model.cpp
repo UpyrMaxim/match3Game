@@ -11,7 +11,7 @@
 #include <QDebug>
 
 Match3Model::Match3Model(QObject *parent, const int dimentionX, const int dimentionY)
-    : QAbstractListModel(parent), m_moveCounter(0),  m_score(0), m_dimentionX(dimentionX), m_dimentionY(dimentionY)
+    : QAbstractListModel(parent), m_moveCounter(0),  m_score(0), m_selectedIndex(-1), m_dimentionX(dimentionX), m_dimentionY(dimentionY)
 {
     srand (time(nullptr));
 
@@ -68,6 +68,11 @@ int Match3Model::getScore() const
 int Match3Model::getMoveCounter() const
 {
     return m_moveCounter;
+}
+
+int Match3Model::getSelected() const
+{
+    return m_selectedIndex;
 }
 
 void Match3Model::resetGame()
@@ -141,18 +146,28 @@ void Match3Model::removeElement(int col, int row, int addToScore)
     increaseScore(addToScore);
 }
 
+void Match3Model::setSelectedIndex(int index)
+{
+    m_selectedIndex = index;
+    emit selectedIndexChanged();
+}
+
+void Match3Model::removeMatches()
+{
+    for (const auto &index : m_cellsToRemove) {
+        int col =  index / m_dimentionY;
+        int row = index % m_dimentionY;
+        removeElement(col, row, 0);
+    }
+}
+
 void Match3Model::removeAllMatches()
 {
     bool dataChanged = true;
     while (dataChanged) {
         checkBoardCells();
-
         if (m_cellsToRemove.size()) {
-            for (const auto &index : m_cellsToRemove) {
-                int col =  index / m_dimentionY;
-                int row = index % m_dimentionY;
-                removeElement(col, row, 0);
-            }
+            removeMatches();
             m_cellsToRemove.clear();
         } else {
             dataChanged = false;
@@ -177,43 +192,59 @@ void Match3Model::increaseMoveCounter()
     emit moveCounterChanged();
 }
 
-bool Match3Model::swapCells(int sourceIndex, int targetIndex)
+bool Match3Model::chooseCell(int index)
 {
-    int indexesDifference = abs(sourceIndex - targetIndex);
-    bool swapIsValid = indexesDifference == 1 || indexesDifference == m_dimentionY;
-
-    if (!swapIsValid || sourceIndex < 0 || targetIndex < 0) {
-        return false;
+    if (m_selectedIndex < 0) {
+        setSelectedIndex(index);
+        return true;
     }
 
-    int sourceCol =  sourceIndex / m_dimentionY;
-    int sourceRow = sourceIndex % m_dimentionY;
+    if (index == m_selectedIndex) {
+        setSelectedIndex();
+        return true;
+    }
 
-    int targetCol =  targetIndex / m_dimentionY;
-    int targetRow = targetIndex % m_dimentionY;
+    int indexesDifference = abs(index - m_selectedIndex);
+    bool swapIsValid = indexesDifference == 1 || indexesDifference == m_dimentionY;
+
+    if (!swapIsValid) {
+        setSelectedIndex(index);
+        return true;
+    }
+
+    int sourceCol =  index / m_dimentionY;
+    int sourceRow = index % m_dimentionY;
+    int targetCol =  m_selectedIndex / m_dimentionY;
+    int targetRow = m_selectedIndex % m_dimentionY;
 
     swap(m_cells[sourceCol][sourceRow], m_cells[targetCol][targetRow]);
     checkBoardCells();
 
     if (!m_cellsToRemove.size()) {
         swap(m_cells[sourceCol][sourceRow], m_cells[targetCol][targetRow]);
+        setSelectedIndex();
         return false;
     }
 
-    int shift = sourceIndex > targetIndex ? 0 : 1;
-
-    beginMoveRows(QModelIndex(), sourceIndex, sourceIndex, QModelIndex(), targetIndex + shift);
-    endMoveRows();
-
-    if (abs(sourceIndex - targetIndex) > 1) {
-        int zeroPositionShift = targetIndex > sourceIndex ? -1 : 1;
-        beginMoveRows(QModelIndex(), targetIndex + zeroPositionShift, targetIndex + zeroPositionShift, QModelIndex(), sourceIndex + shift + zeroPositionShift);
-        endMoveRows();
-    }
-
+    moveCells(index);
     increaseMoveCounter();
+    setSelectedIndex();
 
     return true;
+}
+
+void Match3Model::moveCells(int index)
+{
+    int shift = index > m_selectedIndex ? 0 : 1;
+
+    beginMoveRows(QModelIndex(), index, index, QModelIndex(), m_selectedIndex + shift);
+    endMoveRows();
+
+    if (abs(index - m_selectedIndex) > 1) {
+        int zeroPositionShift = m_selectedIndex > index ? -1 : 1;
+        beginMoveRows(QModelIndex(), m_selectedIndex + zeroPositionShift, m_selectedIndex + zeroPositionShift, QModelIndex(), index + shift + zeroPositionShift);
+        endMoveRows();
+    }
 }
 
 void Match3Model::removeCells()
@@ -222,13 +253,7 @@ void Match3Model::removeCells()
     if (!m_cellsToRemove.size()) {
         return;
     }
-
-    for (const int &index : m_cellsToRemove) {
-        int col =  index / m_dimentionY;
-        int row = index % m_dimentionY;
-        removeElement(col, row, 0);
-    }
-
+    removeMatches();
     checkBoardCells();
 }
 
@@ -242,18 +267,18 @@ void Match3Model::checkBoardCells()
     for(int col = 0; col < m_dimentionX; ++col) {
         checkCol(checkCols, col, 0);
     }
-    for(int row = 0; row < m_dimentionY; ++row) {
-       checkRow(checkRows, 0, row);
+     for(int row = 0; row < m_dimentionY; ++row) {
+        checkRow(checkRows, 0, row);
     }
 
     m_cellsToRemove.clear();
 
     for (int col = 0; col < m_dimentionX; ++col) {
-        for (int row = 0; row < m_dimentionY; ++row) {
-            if ( max(checkCols[col][row], checkRows[col][row]) >= minMatch ) {
-                m_cellsToRemove.push_back(col * m_dimentionY + row);
-            }
-        }
+          for (int row = 0; row < m_dimentionY; ++row) {
+              if ( max(checkCols[col][row], checkRows[col][row]) >= minMatch ) {
+                  m_cellsToRemove.push_back(col * m_dimentionY + row);
+              }
+          }
     }
 }
 
@@ -267,13 +292,13 @@ int Match3Model::checkCol(QVector<QVector<int> > &cells, int col, int row,int va
 
     bool equal = m_cells[col][row] == m_cells[col][row + 1];
     int newValue = equal ? value + 1 : 1;
-    int matchesCount = checkCol(cells, col, row + 1, newValue);
+    int matches = checkCol(cells, col, row + 1, newValue);
 
     if (equal) {
-        value = matchesCount;
+        value = matches;
     }
 
-    cells[col][row] = matchesCount;
+    cells[col][row] = value;
 
     return value;
 }
@@ -287,13 +312,13 @@ int Match3Model::checkRow(QVector<QVector<int> > &cells, int col, int row, int v
 
     bool equal = m_cells[col][row] == m_cells[col + 1][row];
     int newValue = equal ? value + 1 : 1;
-    int matchesCount = checkRow(cells, col + 1, row, newValue);
+    int matches = checkRow(cells, col + 1, row, newValue);
 
     if (equal) {
-        value = matchesCount;
+        value = matches;
     }
 
-    cells[col][row] = matchesCount;
+    cells[col][row] = value;
 
     return value;
 }

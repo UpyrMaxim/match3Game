@@ -6,6 +6,9 @@ Rectangle {
 
 
     property var gameModel: ({ })
+    property int moveSpeed: 400
+    property int addSpeed: 600
+    property int removeSpeed: 400
 
     anchors {
         fill: parent
@@ -18,7 +21,6 @@ Rectangle {
     GridView {
         id: view
 
-        property int selectedIndex: -1
         property var cellsToDestruct: []
 
         anchors {
@@ -36,7 +38,7 @@ Rectangle {
 
             height: view.cellHeight
             width: view.cellWidth
-            scale: index === view.selectedIndex ? 0.8 : 1
+            scale: index === gameModel.selectedIndex ? 0.8 : 1
 
             Rectangle {
                 id: cell
@@ -50,7 +52,6 @@ Rectangle {
                 }
 
                 radius: (width + height) / 2
-                visible: true
                 color: decoration
             }
 
@@ -58,27 +59,23 @@ Rectangle {
                 anchors.fill: parent
 
                 onClicked: {
-                    if (view.selectedIndex < 0) {
-                        view.selectedIndex = index;
-                    } else {
-                        if (!gameModel.swapCells(view.selectedIndex, index)) {
+                    view.currentIndex = gameModel.selectedIndex;
+                    if (!gameModel.chooseCell(index)) {
+                        if (gameModel.selectedIndex < 0) {
                             delegateItem.state = "fail";
-                            view.currentIndex = model.index + (view.selectedIndex - index);
                             view.currentItem.state = "fail";
                         }
-                        view.selectedIndex = -1;
                     }
                 }
             }
-
             states: State {
                 name: "fail";
-                PropertyChanges { target: delegateItem; }
             }
 
             transitions: Transition {
                 from: "*"
                 to: "fail"
+
                 SequentialAnimation {
                     SequentialAnimation {
                         loops: 4
@@ -91,6 +88,7 @@ Rectangle {
                             duration: 50
                             easing.type: Easing.InOutBack
                         }
+
                         NumberAnimation {
                             target: delegateItem
                             property: "scale"
@@ -100,6 +98,7 @@ Rectangle {
                             easing.type: Easing.InOutBack
                         }
                     }
+
                     ScriptAction {
                         script: {
                             delegateItem.state = "default";
@@ -111,7 +110,13 @@ Rectangle {
 
         move: Transition {
             SequentialAnimation {
-               NumberAnimation { id: moveAnimation; properties: "x,y"; duration: 400; alwaysRunToEnd: true }
+               NumberAnimation {
+                   id: moveAnimation;
+                   properties: "x,y";
+                   duration: gameBoard.moveSpeed;
+                   alwaysRunToEnd: true
+               }
+
                ScriptAction {
                    script: {
                        gameModel.removeCells();
@@ -121,21 +126,27 @@ Rectangle {
         }
 
         moveDisplaced: Transition {
-            NumberAnimation { properties: "x,y"; duration: 400 }
+            NumberAnimation { properties: "x,y"; duration: gameBoard.moveSpeed }
         }
 
         add: Transition {
             SequentialAnimation {
                 ParallelAnimation {
-                    NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 600 }
-                    NumberAnimation { properties: "y"; from:  -(view.height - y) ;  duration: 600 }
+                    NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: gameBoard.addSpeed }
+                    NumberAnimation { properties: "y"; from:  -(view.height - y); duration: gameBoard.addSpeed }
                 }
             }
         }
 
         addDisplaced: Transition {
             SequentialAnimation {
-               NumberAnimation {id: moveOnAdd; properties: "x,y"; duration: 600; easing.type: Easing.InBack }
+               NumberAnimation {
+                   id: moveOnAdd;
+                   properties: "x,y";
+                   duration: gameBoard.addSpeed;
+                   easing.type: Easing.InBack
+               }
+
                ScriptAction {
                    script:  gameModel.removeCells();
                }
@@ -143,11 +154,7 @@ Rectangle {
         }
 
         remove: Transition {
-            NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: 400 }
-        }
-
-        removeDisplaced: Transition {
-            NumberAnimation { properties: "x,y"; duration: 400; easing.type: Easing.OutBack }
+            NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: gameBoard.removeSpeed }
         }
     }
 }
