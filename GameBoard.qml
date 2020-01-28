@@ -5,9 +5,9 @@ Rectangle {
     id: gameBoard
 
     property var gameModel: ({ })
-    property int moveSpeed: 500
-    property int addSpeed: 800
-    property int removeSpeed: 500
+    property int moveSpeed: 2500
+    property int addSpeed: 4000
+    property int removeSpeed: 2500
 
     anchors {
         fill: parent
@@ -66,6 +66,12 @@ Rectangle {
 
                 radius: (width + height) / 2
                 color: decoration
+
+                Text {
+                    x: parent.width / 2 - 5
+                    y: parent.height / 2 - 5
+                    text: display
+                }
             }
 
             MouseArea {
