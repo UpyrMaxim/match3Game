@@ -1,11 +1,12 @@
 import QtQuick 2.0
 
 Rectangle {
+    id: button
+
+    property var clicked: function() { }
+
     y: 10
     x: parent.width - 20 - width
-
-    property var gameModel: ({})
-
     width: 60
     height: 20
     radius: height / 2
@@ -27,6 +28,6 @@ Rectangle {
         hoverEnabled: true
         anchors.fill: parent
 
-        onClicked: gameModel.resetGame()
+        onClicked: button.clicked()
     }
 }

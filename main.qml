@@ -26,7 +26,9 @@ Window {
         color: "#deb887"
 
         ResetBtn {
-            gameModel: match3Model
+            clicked: function () {
+                match3Model.resetGame();
+            }
         }
 
         ScoreField {
