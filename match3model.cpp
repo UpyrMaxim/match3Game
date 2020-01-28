@@ -128,21 +128,6 @@ void Match3Model::generateCells()
     }
 }
 
-
-void Match3Model::removeElement(int col, int row, int addToScore)
-{
-    int index = col * m_dimentionY + row;
-    beginRemoveRows(QModelIndex(), index, index);
-    m_cells[col].removeAt(row);
-    endRemoveRows();
-
-    beginInsertRows(QModelIndex(), col * m_dimentionY, col * m_dimentionY);
-    m_cells[col].push_front(getRandomCellColorId());
-    endInsertRows();
-
-    increaseScore(addToScore);
-}
-
 void Match3Model::removeElements(const QList<int> &matches)
 {
     if (!matches.size()) {
@@ -174,8 +159,6 @@ void Match3Model::removeMatches()
     QList<int> indexesToRemove;
     for (const auto &index : m_cellsToRemove) {
         int col =  index / m_dimentionY;
-//        int row =  index % m_dimentionY;
-//        removeElement(col, row);
         if (col == prevCol) {
             indexesToRemove.push_back(index);
         } else {
