@@ -36,8 +36,6 @@ QVariant Match3Model::data(const QModelIndex &index, int role) const
     if (role == Qt::DecorationRole) {
         QString colorName = m_cellTypes[ m_cells[col][row] ].toString();
         return QColor(colorName);
-    } else if (role == Qt::DisplayRole) {
-        return m_cells[col][row] ;
     } else {
         return QVariant();
     }
@@ -95,8 +93,8 @@ void Match3Model::initByJson()
     QFile file;
     file.setFileName(":/setting.json");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-      qWarning() << "Setting file is not exists";
-      return;
+        qWarning() << "Setting file is not exists";
+        return;
     }
     val = file.readAll();
     file.close();
@@ -270,18 +268,18 @@ void Match3Model::checkBoardCells()
     for(int col = 0; col < m_dimentionX; ++col) {
         checkCol(checkCols, col, 0);
     }
-     for(int row = 0; row < m_dimentionY; ++row) {
+    for(int row = 0; row < m_dimentionY; ++row) {
         checkRow(checkRows, 0, row);
     }
 
     m_cellsToRemove.clear();
 
     for (int col = 0; col < m_dimentionX; ++col) {
-          for (int row = 0; row < m_dimentionY; ++row) {
-              if ( max(checkCols[col][row], checkRows[col][row]) >= minMatch ) {
-                  m_cellsToRemove.push_back(col * m_dimentionY + row);
-              }
-          }
+        for (int row = 0; row < m_dimentionY; ++row) {
+            if ( max(checkCols[col][row], checkRows[col][row]) >= minMatch ) {
+                m_cellsToRemove.push_back(col * m_dimentionY + row);
+            }
+        }
     }
 }
 

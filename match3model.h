@@ -42,15 +42,11 @@ private:
     void increaseScore(int multiplicator = 0);
     void increaseMoveCounter();
     void removeElements(const QList<int> &matches);
-
     void removeMatches();
     void moveCells(int sourceIndex, int targetIndex);
-
     void removeAllMatches();
-
     int checkCol(QVector< QVector<int> > &cells, int col, int row, int value = 1);
     int checkRow(QVector< QVector<int> > &cells, int col, int row, int value = 1);
-
     void checkBoardCells();
 private:
     const int minMatch = 3;

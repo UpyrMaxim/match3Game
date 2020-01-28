@@ -66,12 +66,6 @@ Rectangle {
 
                 radius: (width + height) / 2
                 color: decoration
-
-                Text {
-                    x: parent.width / 2 - 5
-                    y: parent.height / 2 - 5
-                    text: display
-                }
             }
 
             MouseArea {
