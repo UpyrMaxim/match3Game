@@ -73,6 +73,7 @@ Rectangle {
 
                 onClicked: {
                     view.moveSwapIsCompleted = false;
+
                     if (view.currentIndex == index) {
                         view.currentIndex = -1;
                     } else if (view.currentIndex < 0 || ![1, gameModel.dimentionY].includes(Math.abs(view.currentIndex - index))) {
@@ -82,6 +83,7 @@ Rectangle {
                             delegateItem.state = "fail";
                             view.currentItem.state = "fail";
                         }
+
                         view.currentIndex = -1;
                     }
                 }
