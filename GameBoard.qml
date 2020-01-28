@@ -5,9 +5,9 @@ Rectangle {
     id: gameBoard
 
     property var gameModel: ({ })
-    property int moveSpeed: 2500
-    property int addSpeed: 4000
-    property int removeSpeed: 2500
+    property int moveSpeed: 800
+    property int addSpeed: 1000
+    property int removeSpeed: 1000
 
     anchors {
         fill: parent
@@ -93,7 +93,7 @@ Rectangle {
                 }
             }
             states: State {
-                name: "fail";
+                name: "fail"
             }
 
             transitions: Transition {
@@ -161,17 +161,6 @@ Rectangle {
                     NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: gameBoard.addSpeed }
                     NumberAnimation { properties: "y"; from:  -(view.height - y); duration: gameBoard.addSpeed }
                 }
-            }
-        }
-
-        addDisplaced: Transition {
-            SequentialAnimation {
-                NumberAnimation {
-                    id: moveOnAdd;
-                    properties: "x,y";
-                    duration: gameBoard.addSpeed;
-                    easing.type: Easing.InBack
-                }
                 ScriptAction {
                     script: {
                         if ( view.addIsFinished ) {
@@ -184,10 +173,18 @@ Rectangle {
             }
         }
 
+        addDisplaced: Transition {
+            NumberAnimation {
+                id: moveOnAdd;
+                properties: "x,y";
+                duration: gameBoard.addSpeed;
+                easing.type: Easing.InBack
+            }
+        }
+
         remove: Transition {
             NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: gameBoard.removeSpeed }
         }
-
 
         Component.onCompleted: { view.currentIndex = -1 }
     }

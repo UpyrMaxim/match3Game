@@ -140,6 +140,7 @@ void Match3Model::removeElements(const QList<int> &matches)
     beginRemoveRows(QModelIndex(), matches.front(), matches.front() + matches.size() - 1);
     for (int i = 0; i < matches.size(); ++i) {
         m_cells[col].removeAt(row);
+
     }
     endRemoveRows();
 
@@ -154,24 +155,24 @@ void Match3Model::removeElements(const QList<int> &matches)
 
 void Match3Model::removeMatches()
 {
-    qDebug() << m_cellsToRemove;
-    int prevCol = 0;
+    int prevCol = -1;
+    int prevRow = -1;
     QList<int> indexesToRemove;
     for (const auto &index : m_cellsToRemove) {
-        int col =  index / m_dimentionY;
-        if (col == prevCol) {
+        int col = index / m_dimentionY;
+        int row = index % m_dimentionY;
+        if (col == prevCol && abs(prevRow - row) == 1) {
             indexesToRemove.push_back(index);
         } else {
-            qDebug() << "removed " << indexesToRemove;
             removeElements(indexesToRemove);
             indexesToRemove.clear();
             prevCol = col;
+            prevRow = row;
             indexesToRemove.push_back(index);
         }
     }
 
     if (m_cellsToRemove.size()) {
-        qDebug() << "removed " << indexesToRemove;
         removeElements(indexesToRemove);
     }
 }
@@ -254,7 +255,7 @@ void Match3Model::removeCells()
     if (!m_cellsToRemove.size()) {
         return;
     }
-    qDebug() << m_cellsToRemove;
+
     removeMatches();
     checkBoardCells();
 }
