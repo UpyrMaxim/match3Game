@@ -11,7 +11,6 @@ class Match3Model : public QAbstractListModel
     Q_PROPERTY(int dimentionY     READ getDimentionY  NOTIFY dimentionYChanged)
     Q_PROPERTY(int moveCounter    READ getMoveCounter NOTIFY moveCounterChanged)
     Q_PROPERTY(int score          READ getScore       NOTIFY scoreChanged)
-    Q_PROPERTY(int selectedIndex  READ getSelected    NOTIFY selectedIndexChanged)
 
 public:
     Match3Model(QObject *parent = nullptr,const int dimentionX = 6, const int dimentionY = 6);
@@ -24,10 +23,9 @@ public:
     int getDimentionY() const;
     int getScore() const;
     int getMoveCounter() const;
-    int getSelected() const;
 
     Q_INVOKABLE void resetGame();
-    Q_INVOKABLE bool chooseCell(int index);
+    Q_INVOKABLE bool chooseCell(int sourceIndex, int targetIndex);
     Q_INVOKABLE void removeCells();
 
 
@@ -36,7 +34,6 @@ signals:
     void dimentionYChanged();
     void scoreChanged();
     void moveCounterChanged();
-    void selectedIndexChanged();
 
 private:
     void initByJson();
@@ -46,10 +43,9 @@ private:
     void increaseMoveCounter();
     void removeElement(int col, int row, int addToScore = 0);
     void removeElements(const QList<int> &matches, int addToScore = 0);
-    void setSelectedIndex(int index = -1);
 
     void removeMatches();
-    void moveCells(int index);
+    void moveCells(int sourceIndex, int targetIndex);
 
     void removeAllMatches();
 
@@ -63,7 +59,6 @@ private:
     QList<QList<int> > m_cells;
     int m_moveCounter;
     int m_score;
-    int m_selectedIndex;
     // settings
     QList<int> m_cellsToRemove;
     QJsonArray m_cellTypes;

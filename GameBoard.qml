@@ -5,9 +5,9 @@ Rectangle {
     id: gameBoard
 
     property var gameModel: ({ })
-    property int moveSpeed: 4000
-    property int addSpeed: 6000
-    property int removeSpeed: 4000
+    property int moveSpeed: 500
+    property int addSpeed: 800
+    property int removeSpeed: 500
 
     anchors {
         fill: parent
@@ -51,7 +51,7 @@ Rectangle {
 
             height: view.cellHeight
             width: view.cellWidth
-            scale: index === gameModel.selectedIndex ? 0.8 : 1
+            scale: index === view.currentIndex ? 0.8 : 1
 
             Rectangle {
                 id: cell
@@ -72,14 +72,17 @@ Rectangle {
                 anchors.fill: parent
 
                 onClicked: {
-                    view.currentIndex = gameModel.selectedIndex;
                     view.moveSwapIsCompleted = false;
-
-                    if (!gameModel.chooseCell(index)) {
-                        if (gameModel.selectedIndex < 0) {
+                    if (view.currentIndex == index) {
+                        view.currentIndex = -1;
+                    } else if (view.currentIndex < 0 || ![1, gameModel.dimentionY].includes(Math.abs(view.currentIndex - index))) {
+                        view.currentIndex = index;
+                    } else {
+                        if (!gameModel.chooseCell(view.currentIndex, index)) {
                             delegateItem.state = "fail";
                             view.currentItem.state = "fail";
                         }
+                        view.currentIndex = -1;
                     }
                 }
             }
@@ -180,5 +183,8 @@ Rectangle {
         remove: Transition {
             NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: gameBoard.removeSpeed }
         }
+
+
+        Component.onCompleted: { view.currentIndex = -1 }
     }
 }

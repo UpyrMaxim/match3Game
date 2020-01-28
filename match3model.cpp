@@ -11,7 +11,7 @@
 #include <QDebug>
 
 Match3Model::Match3Model(QObject *parent, const int dimentionX, const int dimentionY)
-    : QAbstractListModel(parent), m_moveCounter(0),  m_score(0), m_selectedIndex(-1), m_dimentionX(dimentionX), m_dimentionY(dimentionY)
+    : QAbstractListModel(parent), m_moveCounter(0),  m_score(0),  m_dimentionX(dimentionX), m_dimentionY(dimentionY)
 {
     srand (time(nullptr));
 
@@ -70,11 +70,6 @@ int Match3Model::getScore() const
 int Match3Model::getMoveCounter() const
 {
     return m_moveCounter;
-}
-
-int Match3Model::getSelected() const
-{
-    return m_selectedIndex;
 }
 
 void Match3Model::resetGame()
@@ -175,12 +170,6 @@ void Match3Model::removeElements(const QList<int> &matches, int addToScore)
     increaseScore(addToScore);
 }
 
-void Match3Model::setSelectedIndex(int index)
-{
-    m_selectedIndex = index;
-    emit selectedIndexChanged();
-}
-
 void Match3Model::removeMatches()
 {
     qDebug() << m_cellsToRemove;
@@ -235,71 +224,55 @@ void Match3Model::increaseMoveCounter()
     emit moveCounterChanged();
 }
 
-bool Match3Model::chooseCell(int index)
+bool Match3Model::chooseCell(int sourceIndex, int targetIndex)
 {
-    if (m_selectedIndex < 0) {
-        setSelectedIndex(index);
-        return true;
-    }
-
-    if (index == m_selectedIndex) {
-        setSelectedIndex();
-        return true;
-    }
-
-    int indexesDifference = abs(index - m_selectedIndex);
+    int indexesDifference = abs(sourceIndex - targetIndex);
     bool swapIsValid = indexesDifference == 1 || indexesDifference == m_dimentionY;
 
     if (!swapIsValid) {
-        setSelectedIndex(index);
-        return true;
+        return false;
     }
 
-    int sourceCol =  index / m_dimentionY;
-    int sourceRow = index % m_dimentionY;
-    int targetCol =  m_selectedIndex / m_dimentionY;
-    int targetRow = m_selectedIndex % m_dimentionY;
+    int sourceCol =  sourceIndex / m_dimentionY;
+    int sourceRow = sourceIndex % m_dimentionY;
+    int targetCol =  targetIndex / m_dimentionY;
+    int targetRow = targetIndex % m_dimentionY;
 
     swap(m_cells[sourceCol][sourceRow], m_cells[targetCol][targetRow]);
     checkBoardCells();
 
     if (!m_cellsToRemove.size()) {
         swap(m_cells[sourceCol][sourceRow], m_cells[targetCol][targetRow]);
-        setSelectedIndex();
         return false;
     }
 
-    moveCells(index);
+    moveCells(sourceIndex, targetIndex);
     increaseMoveCounter();
-    setSelectedIndex();
 
     return true;
 }
 
-void Match3Model::moveCells(int index)
+void Match3Model::moveCells(int sourceIndex, int targetIndex)
 {
-    int shift = index > m_selectedIndex ? 0 : 1;
+    int shift = targetIndex > sourceIndex ? 0 : 1;
 
-    beginMoveRows(QModelIndex(), index, index, QModelIndex(), m_selectedIndex + shift);
+    beginMoveRows(QModelIndex(), targetIndex, targetIndex, QModelIndex(), sourceIndex + shift);
     endMoveRows();
 
-    if (abs(index - m_selectedIndex) > 1) {
-        int zeroPositionShift = m_selectedIndex > index ? -1 : 1;
-        beginMoveRows(QModelIndex(), m_selectedIndex + zeroPositionShift, m_selectedIndex + zeroPositionShift, QModelIndex(), index + shift + zeroPositionShift);
+    if (abs(targetIndex - sourceIndex) > 1) {
+        int zeroPositionShift = sourceIndex > targetIndex ? -1 : 1;
+        beginMoveRows(QModelIndex(), sourceIndex + zeroPositionShift, sourceIndex + zeroPositionShift, QModelIndex(), targetIndex + shift + zeroPositionShift);
         endMoveRows();
     }
 }
 
 void Match3Model::removeCells()
 {
-
     if (!m_cellsToRemove.size()) {
         return;
     }
     removeMatches();
     checkBoardCells();
-    qDebug() << "removeCells";
-
 }
 
 void Match3Model::checkBoardCells()
