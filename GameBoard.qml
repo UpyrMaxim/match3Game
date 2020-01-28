@@ -4,11 +4,10 @@ import QtQuick 2.0
 Rectangle {
     id: gameBoard
 
-
     property var gameModel: ({ })
-    property int moveSpeed: 400
-    property int addSpeed: 600
-    property int removeSpeed: 400
+    property int moveSpeed: 4000
+    property int addSpeed: 6000
+    property int removeSpeed: 4000
 
     anchors {
         fill: parent
@@ -18,10 +17,25 @@ Rectangle {
 
     color: "#ffe4c4"
 
+    Timer {
+        id: timer
+
+        function setDelayCompletedAddValue (delayTime) {
+            timer.restart();
+            timer.interval = delayTime;
+            timer.start();
+        }
+
+        onTriggered: {
+            view.addIsFinished = true;
+        }
+    }
+
     GridView {
         id: view
 
-        property var cellsToDestruct: []
+        property bool moveSwapIsCompleted: false
+        property bool addIsFinished: true
 
         anchors {
             fill: parent
@@ -32,7 +46,6 @@ Rectangle {
         cellWidth: parent.width / gameModel.dimentionX
         model: gameModel
         interactive: false
-
         delegate: Item {
             id: delegateItem
 
@@ -60,6 +73,8 @@ Rectangle {
 
                 onClicked: {
                     view.currentIndex = gameModel.selectedIndex;
+                    view.moveSwapIsCompleted = false;
+
                     if (!gameModel.chooseCell(index)) {
                         if (gameModel.selectedIndex < 0) {
                             delegateItem.state = "fail";
@@ -111,15 +126,17 @@ Rectangle {
         move: Transition {
             SequentialAnimation {
                NumberAnimation {
-                   id: moveAnimation;
-                   properties: "x,y";
-                   duration: gameBoard.moveSpeed;
+                   id: moveAnimation
+                   properties: "x,y"
+                   duration: gameBoard.moveSpeed
                    alwaysRunToEnd: true
                }
-
                ScriptAction {
                    script: {
-                       gameModel.removeCells();
+                       if (!view.moveSwapIsCompleted) {
+                           gameModel.removeCells();
+                           view.moveSwapIsCompleted = true;
+                       }
                    }
                }
             }
@@ -140,16 +157,23 @@ Rectangle {
 
         addDisplaced: Transition {
             SequentialAnimation {
-               NumberAnimation {
-                   id: moveOnAdd;
-                   properties: "x,y";
-                   duration: gameBoard.addSpeed;
-                   easing.type: Easing.InBack
-               }
-
-               ScriptAction {
-                   script:  gameModel.removeCells();
-               }
+                NumberAnimation {
+                    id: moveOnAdd;
+                    properties: "x,y";
+                    duration: gameBoard.addSpeed;
+                    easing.type: Easing.InBack
+                }
+                ScriptAction {
+                    script: {
+                        console.log("add script status", view.addIsFinished);
+                        if ( view.addIsFinished ) {
+                            console.log("add script")
+                            gameModel.removeCells();
+                            view.addIsFinished = false;
+                            timer.setDelayCompletedAddValue(gameBoard.addSpeed / 2);
+                        }
+                    }
+                }
             }
         }
 

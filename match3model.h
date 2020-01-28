@@ -44,7 +44,8 @@ private:
     int getRandomCellColorId();
     void increaseScore(int multiplicator = 0);
     void increaseMoveCounter();
-    void removeElement(int col, int row, int addToScore);
+    void removeElement(int col, int row, int addToScore = 0);
+    void removeElements(const QList<int> &matches, int addToScore = 0);
     void setSelectedIndex(int index = -1);
 
     void removeMatches();
