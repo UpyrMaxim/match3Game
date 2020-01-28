@@ -168,9 +168,7 @@ Rectangle {
                 }
                 ScriptAction {
                     script: {
-                        console.log("add script status", view.addIsFinished);
                         if ( view.addIsFinished ) {
-                            console.log("add script")
                             gameModel.removeCells();
                             view.addIsFinished = false;
                             timer.setDelayCompletedAddValue(gameBoard.addSpeed / 2);
