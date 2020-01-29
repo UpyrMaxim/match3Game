@@ -136,16 +136,19 @@ void Match3Model::removeElements(const QList<int> &matches)
     int row =  matches.front() % m_dimentionY;
 
     beginRemoveRows(QModelIndex(), matches.front(), matches.front() + matches.size() - 1);
+
     for (int i = 0; i < matches.size(); ++i) {
         m_cells[col].removeAt(row);
-
     }
+
     endRemoveRows();
 
     beginInsertRows(QModelIndex(), col * m_dimentionY, col * m_dimentionY + matches.size() -1);
+
     for (int i = 0; i < matches.size(); ++i) {
         m_cells[col].push_front(getRandomCellColorId());
     }
+
     endInsertRows();
 
     increaseScore(matches.size());
@@ -156,6 +159,7 @@ void Match3Model::removeMatches()
     int prevCol = -1;
     int prevRow = -1;
     QList<int> indexesToRemove;
+
     for (const auto &index : m_cellsToRemove) {
         int col = index / m_dimentionY;
         int row = index % m_dimentionY;
@@ -228,6 +232,7 @@ bool Match3Model::chooseCell(int sourceIndex, int targetIndex)
         swap(m_cells[sourceCol][sourceRow], m_cells[targetCol][targetRow]);
         return false;
     }
+
     moveCells(sourceIndex, targetIndex);
     increaseMoveCounter();
 
@@ -248,14 +253,18 @@ void Match3Model::moveCells(int sourceIndex, int targetIndex)
     }
 }
 
-void Match3Model::removeCells()
+int Match3Model::removeCells()
 {
+
     if (!m_cellsToRemove.size()) {
-        return;
+        return -1;
     }
+
+    int firstIndex = m_cellsToRemove.front();
 
     removeMatches();
     checkBoardCells();
+    return firstIndex;
 }
 
 void Match3Model::checkBoardCells()

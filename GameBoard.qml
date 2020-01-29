@@ -5,9 +5,9 @@ Rectangle {
     id: gameBoard
 
     property var gameModel: ({ })
-    property int moveSpeed: 800
+    property int moveSpeed: 400
     property int addSpeed: 1000
-    property int removeSpeed: 1000
+    property int removeSpeed: 900
 
     anchors {
         fill: parent
@@ -17,25 +17,11 @@ Rectangle {
 
     color: "#ffe4c4"
 
-    Timer {
-        id: timer
-
-        function setDelayCompletedAddValue (delayTime) {
-            timer.restart();
-            timer.interval = delayTime;
-            timer.start();
-        }
-
-        onTriggered: {
-            view.addIsFinished = true;
-        }
-    }
-
     GridView {
         id: view
 
         property bool moveSwapIsCompleted: false
-        property bool addIsFinished: true
+        property int nextIndexToDelete: -1
 
         anchors {
             fill: parent
@@ -139,7 +125,7 @@ Rectangle {
                ScriptAction {
                    script: {
                        if (!view.moveSwapIsCompleted) {
-                           gameModel.removeCells();
+                           view.nextIndexToDelete = gameModel.removeCells();
                            view.moveSwapIsCompleted = true;
                        }
                    }
@@ -152,21 +138,8 @@ Rectangle {
         }
 
         add: Transition {
-            SequentialAnimation {
-                ParallelAnimation {
-                    NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: gameBoard.addSpeed }
-                    NumberAnimation { properties: "y"; from:  -(view.height - y); duration: gameBoard.addSpeed }
-                }
-                ScriptAction {
-                    script: {
-                        if ( view.addIsFinished ) {
-                            gameModel.removeCells();
-                            view.addIsFinished = false;
-                            timer.setDelayCompletedAddValue(gameBoard.addSpeed / 2);
-                        }
-                    }
-                }
-            }
+            NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: gameBoard.addSpeed }
+            NumberAnimation { properties: "y"; from:  -(view.height - y); duration: gameBoard.addSpeed }
         }
 
         addDisplaced: Transition {
@@ -179,7 +152,21 @@ Rectangle {
         }
 
         remove: Transition {
+            id: removeAnimation
+
             NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: gameBoard.removeSpeed }
+            SequentialAnimation {
+                PauseAnimation {
+                    duration: gameBoard.addSpeed
+                }
+                    ScriptAction { script:
+                    {
+                        if (view.nextIndexToDelete === removeAnimation.ViewTransition.index) {
+                             view.nextIndexToDelete = gameModel.removeCells()
+                        }
+                    }
+                }
+            }
         }
 
         Component.onCompleted: { view.currentIndex = -1 }
