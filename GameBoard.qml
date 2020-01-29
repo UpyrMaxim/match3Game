@@ -32,6 +32,7 @@ Rectangle {
         cellWidth: parent.width / gameModel.dimentionX
         model: gameModel
         interactive: false
+
         delegate: Item {
             id: delegateItem
 
@@ -116,37 +117,51 @@ Rectangle {
 
         move: Transition {
             SequentialAnimation {
-               NumberAnimation {
-                   id: moveAnimation
-                   properties: "x,y"
-                   duration: gameBoard.moveSpeed
-                   alwaysRunToEnd: true
-               }
-               ScriptAction {
-                   script: {
-                       if (!view.moveSwapIsCompleted) {
-                           view.nextIndexToDelete = gameModel.removeCells();
-                           view.moveSwapIsCompleted = true;
-                       }
-                   }
-               }
+                NumberAnimation {
+                    id: moveAnimation
+                    properties: "x,y"
+                    duration: gameBoard.moveSpeed
+                    alwaysRunToEnd: true
+                }
+
+                ScriptAction {
+                    script: {
+                        if (!view.moveSwapIsCompleted) {
+                            view.nextIndexToDelete = gameModel.removeCells();
+                            view.moveSwapIsCompleted = true;
+                        }
+                    }
+                }
             }
         }
 
         moveDisplaced: Transition {
-            NumberAnimation { properties: "x,y"; duration: gameBoard.moveSpeed }
+            NumberAnimation {
+                properties: "x,y"
+                duration: gameBoard.moveSpeed
+            }
         }
 
         add: Transition {
-            NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: gameBoard.addSpeed }
-            NumberAnimation { properties: "y"; from:  -(view.height - y); duration: gameBoard.addSpeed }
+            NumberAnimation {
+                property: "opacity"
+                from: 0
+                to: 1.0
+                duration: gameBoard.addSpeed
+            }
+
+            NumberAnimation {
+                properties: "y"
+                from: -(view.height - y)
+                duration: gameBoard.addSpeed
+            }
         }
 
         addDisplaced: Transition {
             NumberAnimation {
-                id: moveOnAdd;
-                properties: "x,y";
-                duration: gameBoard.addSpeed;
+                id: moveOnAdd
+                properties: "x,y"
+                duration: gameBoard.addSpeed
                 easing.type: Easing.InBack
             }
         }
@@ -154,21 +169,30 @@ Rectangle {
         remove: Transition {
             id: removeAnimation
 
-            NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: gameBoard.removeSpeed }
+            NumberAnimation {
+                property: "scale"
+                from: 1.0
+                to: 0
+                duration: gameBoard.removeSpeed
+            }
+
             SequentialAnimation {
                 PauseAnimation {
                     duration: gameBoard.addSpeed
                 }
-                    ScriptAction { script:
-                    {
+
+                ScriptAction {
+                    script: {
                         if (view.nextIndexToDelete === removeAnimation.ViewTransition.index) {
-                             view.nextIndexToDelete = gameModel.removeCells()
+                            view.nextIndexToDelete = gameModel.removeCells();
                         }
                     }
                 }
             }
         }
 
-        Component.onCompleted: { view.currentIndex = -1 }
+        Component.onCompleted: {
+            view.currentIndex = -1;
+        }
     }
 }
