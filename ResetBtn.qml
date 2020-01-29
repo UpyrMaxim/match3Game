@@ -3,7 +3,7 @@ import QtQuick 2.0
 Rectangle {
     id: button
 
-    property var clicked: function() { }
+    signal clicked()
 
     y: 10
     x: parent.width - 20 - width

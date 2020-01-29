@@ -43,7 +43,7 @@ Rectangle {
             Rectangle {
                 id: cell
 
-                anchors.margins: 4
+                anchors.margins: 2
                 anchors.fill: parent
 
                 border {

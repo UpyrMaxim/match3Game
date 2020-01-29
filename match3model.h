@@ -13,11 +13,11 @@ class Match3Model : public QAbstractListModel
     Q_PROPERTY(int score          READ getScore       NOTIFY scoreChanged)
 
 public:
-    Match3Model(QObject *parent = nullptr,const int dimentionX = 6, const int dimentionY = 6);
+    Match3Model(QObject * parent = nullptr,const int dimentionX = 6, const int dimentionY = 6);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    int rowCount(const QModelIndex & parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex & index, int role) const override;
+    Qt::ItemFlags flags(const QModelIndex & index) const override;
 
     int getDimentionX() const;
     int getDimentionY() const;
@@ -41,12 +41,12 @@ private:
     int getRandomCellColorId();
     void increaseScore(int multiplicator = 0);
     void increaseMoveCounter();
-    void removeElements(const QList<int> &matches);
+    void removeElements(const QList<int> & matches);
     void removeMatches();
     void moveCells(int sourceIndex, int targetIndex);
     void removeAllMatches();
-    int checkCol(QVector< QVector<int> > &cells, int col, int row, int value = 1);
-    int checkRow(QVector< QVector<int> > &cells, int col, int row, int value = 1);
+    int checkCol(QVector<QVector<int>> & cells, int col, int row, int value = 1);
+    int checkRow(QVector<QVector<int>> & cells, int col, int row, int value = 1);
     void checkBoardCells();
 private:
     const int minMatch = 3;

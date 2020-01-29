@@ -10,10 +10,10 @@
 
 #include <QDebug>
 
-Match3Model::Match3Model(QObject *parent, const int dimentionX, const int dimentionY)
+Match3Model::Match3Model(QObject * parent, const int dimentionX, const int dimentionY)
     : QAbstractListModel(parent), m_moveCounter(0),  m_score(0),  m_dimentionX(dimentionX), m_dimentionY(dimentionY)
 {
-    srand (time(nullptr));
+    srand(time(nullptr));
 
     initByJson();
     resetGame();
@@ -24,7 +24,7 @@ int Match3Model::rowCount(const QModelIndex &) const
     return m_dimentionX * m_dimentionY; // data reprented by 2d array
 }
 
-QVariant Match3Model::data(const QModelIndex &index, int role) const
+QVariant Match3Model::data(const QModelIndex & index, int role) const
 {
     if (!index.isValid()) {
         return QVariant();
@@ -41,7 +41,7 @@ QVariant Match3Model::data(const QModelIndex &index, int role) const
     }
 }
 
-Qt::ItemFlags Match3Model::flags(const QModelIndex &index) const
+Qt::ItemFlags Match3Model::flags(const QModelIndex & index) const
 {
     if (!index.isValid()) {
         return Qt::ItemIsEnabled;
@@ -89,14 +89,14 @@ void Match3Model::resetGame()
 
 void Match3Model::initByJson()
 {
-    QString val;
-    QFile file;
-    file.setFileName(":/setting.json");
+    QFile file(":/setting.json");
+
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning() << "Setting file is not exists";
         return;
     }
-    val = file.readAll();
+
+    QString val = file.readAll();
     file.close();
 
     // get json content
@@ -126,7 +126,7 @@ void Match3Model::generateCells()
     }
 }
 
-void Match3Model::removeElements(const QList<int> &matches)
+void Match3Model::removeElements(const QList<int> & matches)
 {
     if (!matches.size()) {
         return;
@@ -150,7 +150,6 @@ void Match3Model::removeElements(const QList<int> &matches)
     }
 
     endInsertRows();
-
     increaseScore(matches.size());
 }
 
@@ -160,9 +159,10 @@ void Match3Model::removeMatches()
     int prevRow = -1;
     QList<int> indexesToRemove;
 
-    for (const auto &index : m_cellsToRemove) {
+    for (const auto & index : m_cellsToRemove) {
         int col = index / m_dimentionY;
         int row = index % m_dimentionY;
+
         if (col == prevCol && abs(prevRow - row) == 1) {
             indexesToRemove.push_back(index);
         } else {
@@ -182,8 +182,10 @@ void Match3Model::removeMatches()
 void Match3Model::removeAllMatches()
 {
     bool dataChanged = true;
+
     while (dataChanged) {
         checkBoardCells();
+
         if (m_cellsToRemove.size()) {
             removeMatches();
             m_cellsToRemove.clear();
@@ -255,7 +257,6 @@ void Match3Model::moveCells(int sourceIndex, int targetIndex)
 
 int Match3Model::removeCells()
 {
-
     if (!m_cellsToRemove.size()) {
         return -1;
     }
@@ -273,10 +274,10 @@ void Match3Model::checkBoardCells()
     QVector<Inner> checkRows(m_dimentionX, Inner(m_dimentionY));
     QVector<Inner> checkCols(m_dimentionX, Inner(m_dimentionY));
 
-
     for(int col = 0; col < m_dimentionX; ++col) {
         checkCol(checkCols, col, 0);
     }
+
     for(int row = 0; row < m_dimentionY; ++row) {
         checkRow(checkRows, 0, row);
     }
@@ -293,7 +294,7 @@ void Match3Model::checkBoardCells()
 }
 
 
-int Match3Model::checkCol(QVector<QVector<int> > &cells, int col, int row,int value)
+int Match3Model::checkCol(QVector<QVector<int>> & cells, int col, int row,int value)
 {
     if (row == m_dimentionY - 1) {
         cells[col][row] = value;
@@ -313,7 +314,7 @@ int Match3Model::checkCol(QVector<QVector<int> > &cells, int col, int row,int va
     return value;
 }
 
-int Match3Model::checkRow(QVector<QVector<int> > &cells, int col, int row, int value)
+int Match3Model::checkRow(QVector<QVector<int>> & cells, int col, int row, int value)
 {
     if (col == m_dimentionX - 1) {
         cells[col][row] = value;

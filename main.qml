@@ -26,7 +26,9 @@ Window {
         color: "#deb887"
 
         ResetBtn {
-            clicked: function () {
+            id: reset
+
+            onClicked: {
                 match3Model.resetGame();
             }
         }
