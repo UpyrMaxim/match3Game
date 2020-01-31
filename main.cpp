@@ -21,21 +21,15 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
     engine.load(url);
-    // signals
 
+
+    // connect
     QObject *rootObject = engine.rootObjects().first();
     QObject *matchModel = rootObject->findChild<QObject*>("matchModel");
     QObject *gameBoard= rootObject->findChild<QObject*>("gameBoard");
 
     QObject::connect(gameBoard, SIGNAL(elementAdded(int)),
                      matchModel, SLOT(OnElementAdd(int)));
-    //    qDebug() <<
-
-
-    //    QQmlEngine boardEngine;
-
-    //    QQmlComponent component(&boardEngine, "GameBoard.qml");
-    //    QObject *object = boardEngine.get
 
     return app.exec();
 }

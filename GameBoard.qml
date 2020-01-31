@@ -167,8 +167,8 @@ Rectangle {
 
                 ScriptAction {
                     script: {
-                        console.log("index " + addAnimation.ViewTransition.index)
-                        console.log("test",addAnimation.ViewTransition.index)
+                        console.log("index:", addAnimation.ViewTransition.index)
+                        console.log("indexes", addAnimation.ViewTransition.targetIndexes)
                         gameBoard.elementAdded(addAnimation.ViewTransition.index);
                     }
                 }
@@ -193,7 +193,7 @@ Rectangle {
                 to: 0
                 duration: gameBoard.removeSpeed
             }
-            ScriptAction { script: console.log(removeEx.ViewTransition.index) }
+            ScriptAction { script: console.log("removed element: " ,removeEx.ViewTransition.index) }
         }
 
         Component.onCompleted: {

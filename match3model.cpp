@@ -271,7 +271,7 @@ int Match3Model::removeCells()
 
 void Match3Model::OnElementAdd(int index)
 {
-    qDebug() << "Model::index: " << index;
+    qDebug() << "Model - index: " << index;
     if (index == m_lastToAddIndex) {
         removeCells();
         setLastAddedItemIndex();
