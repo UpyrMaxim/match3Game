@@ -26,7 +26,7 @@ public:
 
     Q_INVOKABLE void resetGame();
     Q_INVOKABLE bool chooseCell(int sourceIndex, int targetIndex);
-    Q_INVOKABLE int removeCells();
+    Q_INVOKABLE void removeCells();
 
 public slots:
     void OnElementAdd(int index);

@@ -256,17 +256,14 @@ void Match3Model::moveCells(int sourceIndex, int targetIndex)
     }
 }
 
-int Match3Model::removeCells()
+void Match3Model::removeCells()
 {
     if (!m_cellsToRemove.size()) {
-        return -1;
+        return;
     }
-
-    int firstIndex = m_cellsToRemove.front();
 
     removeMatches();
     checkBoardCells();
-    return firstIndex;
 }
 
 void Match3Model::OnElementAdd(int index)

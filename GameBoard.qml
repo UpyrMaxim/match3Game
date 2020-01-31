@@ -24,7 +24,6 @@ Rectangle {
         id: view
 
         property bool moveSwapIsCompleted: false
-        property int nextIndexToDelete: -1
 
         anchors {
             fill: parent
@@ -130,7 +129,7 @@ Rectangle {
                 ScriptAction {
                     script: {
                         if (!view.moveSwapIsCompleted) {
-                            view.nextIndexToDelete = gameModel.removeCells();
+                            gameModel.removeCells();
                             view.moveSwapIsCompleted = true;
                         }
                     }
