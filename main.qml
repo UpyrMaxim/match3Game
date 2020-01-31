@@ -47,6 +47,8 @@ Window {
 
         Match3Model {
             id: match3Model
+
+            objectName: "matchModel"
         }
 
         GameBoard {

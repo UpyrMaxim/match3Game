@@ -1,5 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlComponent>
+#include <QDebug>
 #include "match3model.h"
 
 int main(int argc, char *argv[])
@@ -19,6 +21,21 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
     engine.load(url);
+    // signals
+
+    QObject *rootObject = engine.rootObjects().first();
+    QObject *matchModel = rootObject->findChild<QObject*>("matchModel");
+    QObject *gameBoard= rootObject->findChild<QObject*>("gameBoard");
+
+    QObject::connect(gameBoard, SIGNAL(elementAdded(int)),
+                     matchModel, SLOT(OnElementAdd(int)));
+    //    qDebug() <<
+
+
+    //    QQmlEngine boardEngine;
+
+    //    QQmlComponent component(&boardEngine, "GameBoard.qml");
+    //    QObject *object = boardEngine.get
 
     return app.exec();
 }

@@ -9,12 +9,15 @@ Rectangle {
     property int addSpeed: 1000
     property int removeSpeed: 900
 
+    signal elementAdded(int index)
+
     anchors {
         fill: parent
         margins: 10
         topMargin: 40
     }
 
+    objectName: "gameBoard"
     color: "#ffe4c4"
 
     GridView {
@@ -143,17 +146,32 @@ Rectangle {
         }
 
         add: Transition {
-            NumberAnimation {
-                property: "opacity"
-                from: 0
-                to: 1.0
-                duration: gameBoard.addSpeed
-            }
+            id: addAnimation
 
-            NumberAnimation {
-                properties: "y"
-                from: -(view.height - y)
-                duration: gameBoard.addSpeed
+            SequentialAnimation {
+                id: addAnimation2
+                ParallelAnimation {
+                    NumberAnimation {
+                        property: "opacity"
+                        from: 0
+                        to: 1.0
+                        duration: gameBoard.addSpeed
+                    }
+
+                    NumberAnimation {
+                        properties: "y"
+                        from: -(view.height - y)
+                        duration: gameBoard.addSpeed
+                    }
+                }
+
+                ScriptAction {
+                    script: {
+                        console.log("index " + addAnimation.ViewTransition.index)
+                        console.log("test",addAnimation.ViewTransition.index)
+                        gameBoard.elementAdded(addAnimation.ViewTransition.index);
+                    }
+                }
             }
         }
 
@@ -167,7 +185,7 @@ Rectangle {
         }
 
         remove: Transition {
-            id: removeAnimation
+            id: removeEx
 
             NumberAnimation {
                 property: "scale"
@@ -175,20 +193,7 @@ Rectangle {
                 to: 0
                 duration: gameBoard.removeSpeed
             }
-
-            SequentialAnimation {
-                PauseAnimation {
-                    duration: gameBoard.addSpeed
-                }
-
-                ScriptAction {
-                    script: {
-                        if (view.nextIndexToDelete === removeAnimation.ViewTransition.index) {
-                            view.nextIndexToDelete = gameModel.removeCells();
-                        }
-                    }
-                }
-            }
+            ScriptAction { script: console.log(removeEx.ViewTransition.index) }
         }
 
         Component.onCompleted: {

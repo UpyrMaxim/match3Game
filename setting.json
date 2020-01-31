@@ -1,7 +1,7 @@
 {
     "board": {
-        "width": 15,
-        "height": 20
+        "width": 8,
+        "height": 10
     },
     "itemTypes": [
         "red",
