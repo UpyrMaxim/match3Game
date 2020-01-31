@@ -26,10 +26,9 @@ public:
 
     Q_INVOKABLE void resetGame();
     Q_INVOKABLE bool chooseCell(int sourceIndex, int targetIndex);
-    Q_INVOKABLE void removeCells();
 
 public slots:
-    void OnElementAdd(int index);
+    void removeCells();
 
 
 signals:
@@ -51,10 +50,8 @@ private:
     int checkCol(QVector<QVector<int>> & cells, int col, int row, int value = 1);
     int checkRow(QVector<QVector<int>> & cells, int col, int row, int value = 1);
     void checkBoardCells();
-    void setLastAddedItemIndex();
 private:
     const int minMatch = 3;
-    int m_lastToAddIndex;
 
     QList<QList<int>> m_cells;
     int m_moveCounter;

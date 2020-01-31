@@ -3,13 +3,14 @@ import QtQuick 2.0
 
 Rectangle {
     id: gameBoard
+    objectName: "gameBoard"
 
     property var gameModel: ({ })
     property int moveSpeed: 400
     property int addSpeed: 1000
     property int removeSpeed: 900
 
-    signal elementAdded(int index)
+    signal actionCompleted()
 
     anchors {
         fill: parent
@@ -17,13 +18,10 @@ Rectangle {
         topMargin: 40
     }
 
-    objectName: "gameBoard"
     color: "#ffe4c4"
 
     GridView {
         id: view
-
-        property bool moveSwapIsCompleted: false
 
         anchors {
             fill: parent
@@ -61,8 +59,6 @@ Rectangle {
                 anchors.fill: parent
 
                 onClicked: {
-                    view.moveSwapIsCompleted = false;
-
                     if (view.currentIndex == index) {
                         view.currentIndex = -1;
                     } else if (view.currentIndex < 0 || ![1, gameModel.dimentionY].includes(Math.abs(view.currentIndex - index))) {
@@ -118,21 +114,16 @@ Rectangle {
         }
 
         move: Transition {
-            SequentialAnimation {
-                NumberAnimation {
-                    id: moveAnimation
-                    properties: "x,y"
-                    duration: gameBoard.moveSpeed
-                    alwaysRunToEnd: true
-                }
+            NumberAnimation {
+                id: moveAnimation
+                properties: "x,y"
+                duration: gameBoard.moveSpeed
+                alwaysRunToEnd: true
+            }
 
-                ScriptAction {
-                    script: {
-                        if (!view.moveSwapIsCompleted) {
-                            gameModel.removeCells();
-                            view.moveSwapIsCompleted = true;
-                        }
-                    }
+            onRunningChanged: {
+                if (!running) {
+                    actionCompleted();
                 }
             }
         }
@@ -145,31 +136,22 @@ Rectangle {
         }
 
         add: Transition {
-            id: addAnimation
+            NumberAnimation {
+                property: "opacity"
+                from: 0
+                to: 1.0
+                duration: gameBoard.addSpeed
+            }
 
-            SequentialAnimation {
-                id: addAnimation2
-                ParallelAnimation {
-                    NumberAnimation {
-                        property: "opacity"
-                        from: 0
-                        to: 1.0
-                        duration: gameBoard.addSpeed
-                    }
+            NumberAnimation {
+                properties: "y"
+                from: -(view.height - y)
+                duration: gameBoard.addSpeed
+            }
 
-                    NumberAnimation {
-                        properties: "y"
-                        from: -(view.height - y)
-                        duration: gameBoard.addSpeed
-                    }
-                }
-
-                ScriptAction {
-                    script: {
-                        console.log("index:", addAnimation.ViewTransition.index)
-                        console.log("indexes", addAnimation.ViewTransition.targetIndexes)
-                        gameBoard.elementAdded(addAnimation.ViewTransition.index);
-                    }
+            onRunningChanged: {
+                if (!running) {
+                    actionCompleted();
                 }
             }
         }
@@ -184,15 +166,12 @@ Rectangle {
         }
 
         remove: Transition {
-            id: removeEx
-
             NumberAnimation {
                 property: "scale"
                 from: 1.0
                 to: 0
                 duration: gameBoard.removeSpeed
             }
-            ScriptAction { script: console.log("removed element: " ,removeEx.ViewTransition.index) }
         }
 
         Component.onCompleted: {

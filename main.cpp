@@ -27,8 +27,8 @@ int main(int argc, char * argv[])
     QObject * matchModel = rootObject->findChild<QObject *>("matchModel");
     QObject * gameBoard = rootObject->findChild<QObject *>("gameBoard");
 
-    QObject::connect(gameBoard, SIGNAL(elementAdded(int)),
-                     matchModel, SLOT(OnElementAdd(int)));
+    QObject::connect(gameBoard, SIGNAL(actionCompleted()),
+                     matchModel, SLOT(removeCells()));
 
     return app.exec();
 }

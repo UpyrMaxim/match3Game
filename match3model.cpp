@@ -11,7 +11,7 @@
 #include <QDebug>
 
 Match3Model::Match3Model(QObject * parent, const int dimentionX, const int dimentionY)
-    : QAbstractListModel(parent), m_lastToAddIndex(-1), m_moveCounter(0),  m_score(0),  m_dimentionX(dimentionX), m_dimentionY(dimentionY)
+    : QAbstractListModel(parent), m_moveCounter(0),  m_score(0),  m_dimentionX(dimentionX), m_dimentionY(dimentionY)
 {
     srand(time(nullptr));
 
@@ -235,7 +235,6 @@ bool Match3Model::chooseCell(int sourceIndex, int targetIndex)
         return false;
     }
 
-    setLastAddedItemIndex();
     moveCells(sourceIndex, targetIndex);
     increaseMoveCounter();
 
@@ -258,6 +257,7 @@ void Match3Model::moveCells(int sourceIndex, int targetIndex)
 
 void Match3Model::removeCells()
 {
+    qDebug() << "model::removeCells";
     if (!m_cellsToRemove.size()) {
         return;
     }
@@ -265,18 +265,6 @@ void Match3Model::removeCells()
     removeMatches();
     checkBoardCells();
 }
-
-void Match3Model::OnElementAdd(int index)
-{
-    qDebug() << "Model - index: " << index;
-    if (index == m_lastToAddIndex) {
-        removeCells();
-        setLastAddedItemIndex();
-    }
-}
-
-
-
 
 void Match3Model::checkBoardCells()
 {
@@ -302,16 +290,6 @@ void Match3Model::checkBoardCells()
         }
     }
 }
-
-void Match3Model::setLastAddedItemIndex()
-{
-    if (!m_cellsToRemove.isEmpty()) {
-        m_lastToAddIndex = m_cellsToRemove.front() - m_cellsToRemove.front() % m_dimentionY;
-    } else {
-        m_lastToAddIndex = -1;
-    }
-}
-
 
 int Match3Model::checkCol(QVector<QVector<int>> & cells, int col, int row,int value)
 {
