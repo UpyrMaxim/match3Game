@@ -73,6 +73,7 @@ Rectangle {
                     }
                 }
             }
+
             states: State {
                 name: "fail"
             }

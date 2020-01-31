@@ -30,7 +30,6 @@ public:
 public slots:
     void removeCells();
 
-
 signals:
     void dimentionXChanged();
     void dimentionYChanged();

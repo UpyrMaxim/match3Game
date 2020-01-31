@@ -12,10 +12,8 @@ Window {
     width: 500
     height: width * match3Model.dimentionY / match3Model.dimentionX
 
-    minimumWidth: 300;
-    minimumHeight: 400;
-    maximumWidth: 2 * height
-    maximumHeight: 2 * width
+    minimumWidth: 300
+    minimumHeight: 400
 
     title: qsTr("Match 3")
 

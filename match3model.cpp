@@ -86,7 +86,6 @@ void Match3Model::resetGame()
     endResetModel();
 }
 
-
 void Match3Model::initByJson()
 {
     QFile file(":/setting.json");
@@ -194,7 +193,6 @@ void Match3Model::removeAllMatches()
         }
     }
 }
-
 
 int Match3Model::getRandomCellColorId()
 {
