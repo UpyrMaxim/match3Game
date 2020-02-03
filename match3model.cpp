@@ -158,24 +158,27 @@ void Match3Model::removeMatches()
     int prevRow = -1;
     QList<int> indexesToRemove;
 
-    for (const auto & index : m_cellsToRemove) {
-        int col = index / m_dimentionY;
-        int row = index % m_dimentionY;
-
-        if (col == prevCol && abs(prevRow - row) == 1) {
-            indexesToRemove.push_back(index);
+    for (int i = 0; i <= m_cellsToRemove.size(); ++i) {
+        if(i == m_cellsToRemove.size()) {
+             removeElements(indexesToRemove);
         } else {
-            removeElements(indexesToRemove);
-            indexesToRemove.clear();
-            prevCol = col;
-            prevRow = row;
-            indexesToRemove.push_back(index);
+            int col = m_cellsToRemove[i] / m_dimentionY;
+            int row = m_cellsToRemove[i] % m_dimentionY;
+
+            if (col == prevCol && abs(prevRow - row) == 1) {
+                indexesToRemove.push_back(m_cellsToRemove[i]);
+                 prevRow = row;
+            } else {
+                removeElements(indexesToRemove);
+                indexesToRemove.clear();
+                prevCol = col;
+                prevRow = row;
+                indexesToRemove.push_back(m_cellsToRemove[i]);
+            }
         }
     }
 
-    if (m_cellsToRemove.size()) {
-        removeElements(indexesToRemove);
-    }
+    m_cellsToRemove.clear();
 }
 
 void Match3Model::removeAllMatches()
@@ -187,7 +190,6 @@ void Match3Model::removeAllMatches()
 
         if (m_cellsToRemove.size()) {
             removeMatches();
-            m_cellsToRemove.clear();
         } else {
             dataChanged = false;
         }
@@ -253,9 +255,8 @@ void Match3Model::moveCells(int sourceIndex, int targetIndex)
     }
 }
 
-void Match3Model::removeCells()
+void Match3Model::actionCompleted()
 {
-    qDebug() << "model::removeCells";
     if (!m_cellsToRemove.size()) {
         return;
     }
@@ -277,8 +278,6 @@ void Match3Model::checkBoardCells()
     for(int row = 0; row < m_dimentionY; ++row) {
         checkRow(checkRows, 0, row);
     }
-
-    m_cellsToRemove.clear();
 
     for (int col = 0; col < m_dimentionX; ++col) {
         for (int row = 0; row < m_dimentionY; ++row) {

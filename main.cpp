@@ -23,12 +23,12 @@ int main(int argc, char * argv[])
     engine.load(url);
 
     // connect
-    QObject * rootObject = engine.rootObjects().first();
-    QObject * matchModel = rootObject->findChild<QObject *>("matchModel");
-    QObject * gameBoard = rootObject->findChild<QObject *>("gameBoard");
+//    QObject * rootObject = engine.rootObjects().first();
+//    QObject * matchModel = rootObject->findChild<QObject *>("matchModel");
+//    QObject * gameBoard = rootObject->findChild<QObject *>("gameBoard");
 
-    QObject::connect(gameBoard, SIGNAL(actionCompleted()),
-                     matchModel, SLOT(removeCells()));
+//    QObject::connect(gameBoard, SIGNAL(actionCompleted()),
+//                     matchModel, SLOT(removeCells()));
 
     return app.exec();
 }

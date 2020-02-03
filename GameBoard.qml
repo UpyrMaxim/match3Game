@@ -10,8 +10,6 @@ Rectangle {
     property int addSpeed: 1000
     property int removeSpeed: 900
 
-    signal actionCompleted()
-
     anchors {
         fill: parent
         margins: 10
@@ -126,7 +124,7 @@ Rectangle {
 
             onRunningChanged: {
                 if (!running) {
-                    actionCompleted();
+                    gameModel.actionCompleted();
                 }
             }
         }
@@ -154,14 +152,13 @@ Rectangle {
 
             onRunningChanged: {
                 if (!running) {
-                    actionCompleted();
+                    gameModel.actionCompleted();
                 }
             }
         }
 
         addDisplaced: Transition {
             NumberAnimation {
-                id: moveOnAdd
                 properties: "x,y"
                 duration: gameBoard.addSpeed
                 easing.type: Easing.InBack
