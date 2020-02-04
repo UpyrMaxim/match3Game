@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Window 2.12
 import custom.Match3Model 1.0
+import QtQuick.Dialogs 1.3
 
 
 Window {
@@ -46,10 +47,25 @@ Window {
         Match3Model {
             id: match3Model
             objectName: "matchModel"
+
+            onGameOver: messageDialog.open();
         }
 
         GameBoard {
             gameModel: match3Model
         }
+    }
+
+    MessageDialog {
+        id: messageDialog
+
+        icon: StandardIcon.Information
+        title: "Game over!"
+        text: "You have no moves left, your score is " + match3Model.score + " for " + match3Model.moveCounter + " moves. \n Do you want to start another one?"
+        standardButtons: StandardButton.Yes | StandardButton.No
+        visible: false
+
+        onYes: match3Model.resetGame();
+        onNo: console.log("presed no")
     }
 }

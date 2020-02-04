@@ -25,6 +25,7 @@ public:
     int getMoveCounter() const;
 
     Q_INVOKABLE void resetGame();
+    Q_INVOKABLE bool checkGameOver();
     Q_INVOKABLE bool chooseCell(int sourceIndex, int targetIndex);
     Q_INVOKABLE void actionCompleted();
 
@@ -33,6 +34,7 @@ signals:
     void dimentionYChanged();
     void scoreChanged();
     void moveCounterChanged();
+    void gameOver();
 
 private:
     void initByJson();
@@ -44,9 +46,14 @@ private:
     void removeMatches();
     void moveCells(int sourceIndex, int targetIndex);
     void removeAllMatches();
+    void checkBoardCells();
+
     int checkCol(QVector<QVector<int>> & cells, int col, int row, int value = 1);
     int checkRow(QVector<QVector<int>> & cells, int col, int row, int value = 1);
-    void checkBoardCells();
+    bool checkMidSwapCol(int col, int row, int value);
+    bool checkMidSwapRow(int col, int row, int value);
+    bool checkSideSwapRow(int col, int row, int value);
+    bool checkSideSwapCol(int col, int row, int value);
 private:
     const int minMatch = 3;
 

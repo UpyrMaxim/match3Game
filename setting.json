@@ -1,6 +1,6 @@
 {
     "board": {
-        "width": 9,
+        "width": 3,
         "height": 3
     },
     "itemTypes": [
