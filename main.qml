@@ -48,7 +48,7 @@ Window {
             id: match3Model
             objectName: "matchModel"
 
-            onGameOver: messageDialog.open();
+            onGameOver: messageDialog.open()
         }
 
         GameBoard {
@@ -65,7 +65,7 @@ Window {
         standardButtons: StandardButton.Yes | StandardButton.No
         visible: false
 
-        onYes: match3Model.resetGame();
+        onYes: match3Model.resetGame()
         onNo: console.log("presed no")
     }
 }
