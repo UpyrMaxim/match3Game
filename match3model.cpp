@@ -326,7 +326,9 @@ bool Match3Model::checkGameOver()
                 if(checkSideSwapCol(col, row, prevVal)) {
                     return true;
                 }
-            } else if (col < m_dimentionY - 1 && prevVal == m_cells[col + 1][row]) {
+            }
+
+            if (col < m_dimentionY - 1 && prevVal == m_cells[col + 1][row]) {
                 if (checkMidSwapCol(col, row, prevVal)) {
                     return true;
                 }
