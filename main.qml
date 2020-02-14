@@ -10,7 +10,7 @@ Window {
     x: { Screen.width / 2 - width / 2 }
     y: { Screen.height / 2 - height / 2 }
     visible: true
-    width: 500
+    width: 600
     height: width * match3Model.dimentionY / match3Model.dimentionX
 
     minimumWidth: 300

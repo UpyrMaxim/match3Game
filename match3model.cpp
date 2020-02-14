@@ -307,7 +307,7 @@ bool Match3Model::checkGameOver()
                 if(checkSideSwapRow(col, row, prevVal)) {
                     return true;
                 }
-            } else if (row < m_dimentionX - 1 && prevVal == m_cells[col][row + 1]) {
+            } else if (row < m_dimentionY - 1 && prevVal == m_cells[col][row + 1]) {
                 if (checkMidSwapRow(col, row, prevVal)) {
                     return true;
                 }
@@ -318,17 +318,17 @@ bool Match3Model::checkGameOver()
     }
 
     // check by column
-    for (int row = 0; row < m_dimentionX; ++row) {
+    for (int row = 0; row < m_dimentionY; ++row) {
         int prevVal = m_cells[0][row];
 
-        for (int col = 1; col < m_dimentionY; ++col) {
+        for (int col = 1; col < m_dimentionX; ++col) {
             if (prevVal == m_cells[col][row]) {
                 if(checkSideSwapCol(col, row, prevVal)) {
                     return true;
                 }
             }
 
-            if (col < m_dimentionY - 1 && prevVal == m_cells[col + 1][row]) {
+            if (col < m_dimentionX - 1 && prevVal == m_cells[col + 1][row]) {
                 if (checkMidSwapCol(col, row, prevVal)) {
                     return true;
                 }
@@ -349,7 +349,7 @@ bool Match3Model::checkMidSwapRow(int col, int row, int value)
         swapable |= m_cells[col - 1][row] == value;
     }
 
-    if (col < m_dimentionY - 1) {
+    if (col < m_dimentionX - 1) {
         swapable |= m_cells[col + 1][row] == value;
     }
 
@@ -364,7 +364,7 @@ bool Match3Model::checkMidSwapCol(int col, int row, int value)
         swapable |= m_cells[col][row - 1] == value;
     }
 
-    if (row < m_dimentionX - 1) {
+    if (row < m_dimentionY - 1) {
         swapable |= m_cells[col][row + 1] == value;
     }
 
@@ -383,19 +383,19 @@ bool Match3Model::checkSideSwapCol(int col, int row, int value)
         swapable |= m_cells[col - 2][row - 1] == value;
     }
 
-    if (col > 1 && row < m_dimentionX - 1) {
+    if (col > 1 && row < m_dimentionY - 1) {
         swapable |= m_cells[col - 2][row + 1] == value;
     }
 
-    if (col < m_dimentionY - 1 && row > 0) {
+    if (col < m_dimentionX - 1 && row > 0) {
         swapable |= m_cells[col + 1][row - 1] == value;
     }
 
-    if (col < m_dimentionY - 1 && row < m_dimentionX - 1) {
+    if (col < m_dimentionX - 1 && row < m_dimentionY - 1) {
         swapable |= m_cells[col + 1][row + 1] == value;
     }
 
-    if (col < m_dimentionY - 2) {
+    if (col < m_dimentionX - 2) {
         swapable |= m_cells[col + 2][row] == value;
     }
 
@@ -414,19 +414,19 @@ bool Match3Model::checkSideSwapRow(int col, int row, int value)
         swapable |= m_cells[col - 1][row - 2] == value;
     }
 
-    if (col < m_dimentionY - 1 && row > 1) {
+    if (col < m_dimentionX - 1 && row > 1) {
         swapable |= m_cells[col + 1][row - 2] == value;
     }
 
-    if (col > 0 && row < m_dimentionX - 1) {
+    if (col > 0 && row < m_dimentionY - 1) {
         swapable |= m_cells[col - 1][row + 1] == value;
     }
 
-    if (col < m_dimentionY - 1 && row < m_dimentionX - 1) {
+    if (col < m_dimentionX - 1 && row < m_dimentionY - 1) {
         swapable |= m_cells[col + 1][row + 1] == value;
     }
 
-    if (row < m_dimentionX - 2) {
+    if (row < m_dimentionY - 2) {
         swapable |= m_cells[col][row + 2] == value;
     }
 
